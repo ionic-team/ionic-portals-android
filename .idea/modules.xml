@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ionic-portals-android.iml" filepath="$PROJECT_DIR$/.idea/modules/ionic-portals-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/IonicPortals/ionic-portals-android.IonicPortals.iml" filepath="$PROJECT_DIR$/.idea/modules/IonicPortals/ionic-portals-android.IonicPortals.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/portalstestapp/ionic-portals-android.portalstestapp.iml" filepath="$PROJECT_DIR$/.idea/modules/portalstestapp/ionic-portals-android.portalstestapp.iml" />
+    </modules>
+  </component>
+</project>
