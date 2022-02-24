@@ -17,7 +17,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
-        run: chmod +x ./android/gradlew
+        run: chmod +x ./gradlew
       - name: Grant execute permission for publishing script
         run: chmod +x ./scripts/publish-android.sh
       - name: Run publish script
