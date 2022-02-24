@@ -5,6 +5,8 @@ plugins {
     kotlin("android")
 }
 
+apply(from = file("./scripts/publish-module.gradle"))
+
 android {
     compileSdk = 30
 
