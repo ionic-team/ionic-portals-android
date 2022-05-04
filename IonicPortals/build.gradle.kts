@@ -40,7 +40,7 @@ android {
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:3.4.1")
+    api("com.capacitorjs:core:3.5.1")
     compileOnly("io.ionic:liveupdates:0.0.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")

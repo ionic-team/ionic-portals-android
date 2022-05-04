@@ -135,6 +135,11 @@ open class PortalFragment : Fragment {
                 if (portal != null) {
                     val startDir: String = portal?.startDir!!
                     initialPlugins.addAll(portal?.plugins!!)
+
+                    if(config == null) {
+                        config = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    }
+
                     bridge = Bridge.Builder(this)
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)

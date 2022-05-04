@@ -26,8 +26,8 @@ apply(from = file("./IonicPortals/scripts/publish-root.gradle"))
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
+        jcenter()
     }
 }
 
