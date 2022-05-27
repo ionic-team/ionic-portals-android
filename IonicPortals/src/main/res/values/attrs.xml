@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="PortalView">
+    <declare-styleable name="PortalNativeView">
         <attr name="portalId" format="string" localization="suggested"/>
     </declare-styleable>
 </resources>

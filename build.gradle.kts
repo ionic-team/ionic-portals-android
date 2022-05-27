@@ -28,3 +28,5 @@ allprojects {
 tasks.register("clean").configure {
     delete("build")
 }
+//
+//apply(plugin = "org.jetbrains.kotlin.plugin.serialization")

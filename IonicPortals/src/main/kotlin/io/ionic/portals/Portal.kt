@@ -122,7 +122,7 @@ class PortalBuilder(val name: String) {
         return this
     }
 
-    fun addPlugin(plugin: Class<out Plugin?>): PortalBuilder {
+    fun addPlugin(plugin: Class<out Plugin>): PortalBuilder {
         plugins.add(plugin)
         return this
     }

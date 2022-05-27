@@ -66,11 +66,11 @@ class PortalView : FrameLayout {
      * @param attrs
      */
     private fun readAttributes(context: Context, attrs: AttributeSet) {
-        val a = context.obtainStyledAttributes(attrs, R.styleable.PortalView, 0, 0)
-        portalId = a.getString(R.styleable.PortalView_portalId)
-        viewId = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "id")
-        tag = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "tag")
-        a.recycle()
+//        val a = context.obtainStyledAttributes(attrs, R.styleable.PortalView, 0, 0)
+//        portalId = a.getString(R.styleable.PortalView_portalId)
+//        viewId = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "id")
+//        tag = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "tag")
+//        a.recycle()
     }
 
     @Throws(Exception::class)
