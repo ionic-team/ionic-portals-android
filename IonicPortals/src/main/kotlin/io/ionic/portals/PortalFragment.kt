@@ -27,6 +27,7 @@ open class PortalFragment : Fragment {
     private var config: CapConfig? = null
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
+    private var initialContext: Any? = null
 
     constructor()
 
@@ -95,6 +96,20 @@ open class PortalFragment : Fragment {
 
     fun addWebViewListener(webViewListener: WebViewListener) {
         webViewListeners.add(webViewListener)
+    }
+
+    /**
+     * Set an Initial Context that will be loaded in lieu of one set on the Portal object.
+     */
+    fun setInitialContext(initialContext: Any) {
+        this.initialContext = initialContext
+    }
+
+    /**
+     * Get the Initial Context that will be loaded in lieu of one set on the Portal object, if set.
+     */
+    fun getInitialContext(): Any? {
+        return this.initialContext
     }
 
     fun reload() {
@@ -174,20 +189,21 @@ open class PortalFragment : Fragment {
     }
 
     private fun setupInitialContextListener() {
-        if (portal?.initialContext !== null) {
+        if (initialContext != null || portal?.initialContext !== null) {
             val listener = object: WebViewListener() {
                 override fun onPageStarted(webView: WebView?) {
                     super.onPageStarted(webView)
-                    val jsonObject: JSONObject = when (val initialContext = portal!!.initialContext) {
+
+                    val jsonObject: JSONObject = when (val iContext = initialContext ?: portal?.initialContext) {
                         is String -> {
                             try {
-                                JSONObject(initialContext)
+                                JSONObject(iContext)
                             } catch (ex: JSONException) {
                                 throw Error("initialContext must be a JSON string or a Map")
                             }
                         }
                         is Map<*, *> -> {
-                            JSONObject(initialContext.toMap())
+                            JSONObject(iContext.toMap())
                         }
                         else -> {
                             throw Error("initialContext must be a JSON string or a Map")
