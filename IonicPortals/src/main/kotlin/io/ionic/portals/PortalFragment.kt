@@ -27,6 +27,7 @@ open class PortalFragment : Fragment {
     private var config: CapConfig? = null
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
+    private var initialContext: Any? = null
 
     constructor()
 
@@ -95,6 +96,20 @@ open class PortalFragment : Fragment {
 
     fun addWebViewListener(webViewListener: WebViewListener) {
         webViewListeners.add(webViewListener)
+    }
+
+    /**
+     * Set an Initial Context that will be loaded in lieu of one set on the Portal object.
+     */
+    fun setInitialContext(initialContext: Any) {
+        this.initialContext = initialContext
+    }
+
+    /**
+     * Get the Initial Context that will be loaded in lieu of one set on the Portal object, if set.
+     */
+    fun getInitialContext(): Any? {
+        return this.initialContext
     }
 
     fun reload() {
@@ -174,36 +189,35 @@ open class PortalFragment : Fragment {
     }
 
     private fun setupInitialContextListener() {
-        if (portal?.initialContext !== null) {
-            val listener = object: WebViewListener() {
-                override fun onPageStarted(webView: WebView?) {
-                    super.onPageStarted(webView)
-                    val jsonObject: JSONObject = when (val initialContext = portal!!.initialContext) {
-                        is String -> {
-                            try {
-                                JSONObject(initialContext)
-                            } catch (ex: JSONException) {
-                                throw Error("initialContext must be a JSON string or a Map")
-                            }
-                        }
-                        is Map<*, *> -> {
-                            JSONObject(initialContext.toMap())
-                        }
-                        else -> {
+        val initialContext = this.initialContext ?: portal?.initialContext ?: return
+        val listener = object: WebViewListener() {
+            override fun onPageStarted(webView: WebView?) {
+                super.onPageStarted(webView)
+                val jsonObject: JSONObject = when (initialContext) {
+                    is String -> {
+                        try {
+                            JSONObject(initialContext)
+                        } catch (ex: JSONException) {
                             throw Error("initialContext must be a JSON string or a Map")
                         }
                     }
-                    val portalInitialContext = "{ \"name\": \"" + portal?.name + "\"," +
-                            " \"value\": " + jsonObject.toString() +
-                            " } "
-                    webView!!.evaluateJavascript(
-                        "window.portalInitialContext = $portalInitialContext", null
-                    )
+                    is Map<*, *> -> {
+                        JSONObject(initialContext.toMap())
+                    }
+                    else -> {
+                        throw Error("initialContext must be a JSON string or a Map")
+                    }
                 }
+                val portalInitialContext = "{ \"name\": \"" + portal?.name + "\"," +
+                        " \"value\": " + jsonObject.toString() +
+                        " } "
+                webView!!.evaluateJavascript(
+                    "window.portalInitialContext = $portalInitialContext", null
+                )
             }
-
-            webViewListeners.add(listener)
         }
+
+        webViewListeners.add(listener)
     }
 
     /**
