@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0]() (2022-06-24)
+
+* feat: allow an initialContext to be set on PortalFragment
+
+
+
+
+
+
 # [0.5.1](https://github.com/ionic-team/ionic-portals/compare/0.4.2...0.5.1) (2022-05-4)
 
 * **android:**  adds a default config to resolve focus issue for Portals apps in Android ([#2](https://github.com/ionic-team/ionic-portals-android/pull/2))
