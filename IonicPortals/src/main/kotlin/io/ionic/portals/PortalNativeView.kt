@@ -47,6 +47,12 @@ class PortalNativeView : WebView {
         viewId = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "id")
         tag = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "tag")
         a.recycle()
+
+        if (portalId == null) {
+            throw IllegalStateException("Portal views must have a defined portalId")
+        } else {
+            portal = PortalManager.getPortal(portalId!!)
+        }
     }
 
     override fun reload() {
@@ -61,28 +67,28 @@ class PortalNativeView : WebView {
                 throw Exception("Ionic Portals has not been setup with any Portals!")
             }
 
-            if (portalId == null) {
-                throw IllegalStateException("Portal views must have a defined portalId")
+            if (portal == null) {
+                if (portalId == null) {
+                    throw IllegalStateException("Portal views must have a defined portalId")
+                }
+
+                portal = PortalManager.getPortal(portalId!!)
             }
 
-            portalId?.let {
-                val portal: Portal = PortalManager.getPortal(it)
+            if (bridge == null) {
+                Logger.debug("Loading Bridge with Portal")
 
-                if (bridge == null) {
-                    Logger.debug("Loading Bridge with Portal")
+                val startDir: String = portal!!.startDir
+                initialPlugins.addAll(portal!!.plugins)
 
-                    val startDir: String = portal.startDir
-                    initialPlugins.addAll(portal.plugins)
+                bridge = Bridge.Builder(this)
+                    .setPlugins(initialPlugins)
+                    .setConfig(config)
+                    .addWebViewListeners(webViewListeners)
+                    .create()
 
-                    bridge = Bridge.Builder(this)
-                        .setPlugins(initialPlugins)
-                        .setConfig(config)
-                        .addWebViewListeners(webViewListeners)
-                        .create()
-
-                    bridge?.setServerAssetPath(startDir)
-                    keepRunning = bridge?.shouldKeepRunning()!!
-                }
+                bridge?.setServerAssetPath(startDir)
+                keepRunning = bridge?.shouldKeepRunning()!!
             }
         }
     }
