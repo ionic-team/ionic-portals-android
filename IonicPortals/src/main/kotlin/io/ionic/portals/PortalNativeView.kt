@@ -1,18 +1,24 @@
 package io.ionic.portals
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.webkit.WebView
+import androidx.activity.result.ActivityResultCaller
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.findFragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.getcapacitor.*
 
-class PortalNativeView : WebView {
-
-    private var bridge: Bridge? = null
-    private var portal: Portal? = null
-
+class PortalNativeView : WebView, DefaultLifecycleObserver {
+    var bridge: Bridge? = null
+    var portal: Portal? = null
     var portalId: String? = null
     var viewId: String? = null
     var tag: String? = null
+    var wasStopped: Boolean = false
 
     private var keepRunning = true
     private val initialPlugins: MutableList<Class<out Plugin?>> = ArrayList()
@@ -91,5 +97,41 @@ class PortalNativeView : WebView {
                 keepRunning = bridge?.shouldKeepRunning()!!
             }
         }
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        super<DefaultLifecycleObserver>.onPause(owner)
+        bridge?.onPause()
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super<DefaultLifecycleObserver>.onResume(owner)
+        bridge?.onResume()
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        if(wasStopped) {
+            wasStopped = false
+            bridge?.onRestart()
+        }
+
+        super.onStart(owner)
+        bridge?.onStart()
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        bridge?.onStop()
+        wasStopped = true
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        bridge?.onDestroy()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        bridge?.onConfigurationChanged(newConfig)
     }
 }
