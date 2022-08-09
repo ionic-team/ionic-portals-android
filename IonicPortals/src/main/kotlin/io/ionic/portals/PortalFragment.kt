@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
@@ -138,7 +140,6 @@ open class PortalFragment : Fragment {
      */
     private fun load(savedInstanceState: Bundle?) {
         if (PortalManager.isRegistered()) {
-            setupInitialContextListener()
             if (bridge == null) {
                 Logger.debug("Loading Bridge with Portal")
 
@@ -161,6 +162,8 @@ open class PortalFragment : Fragment {
                         .setConfig(config)
                         .addWebViewListeners(webViewListeners)
                         .create()
+
+                    setupInitialContextListener()
 
                     if (portal?.liveUpdateConfig != null) {
                         liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
@@ -190,34 +193,42 @@ open class PortalFragment : Fragment {
 
     private fun setupInitialContextListener() {
         val initialContext = this.initialContext ?: portal?.initialContext ?: return
-        val listener = object: WebViewListener() {
-            override fun onPageStarted(webView: WebView?) {
-                super.onPageStarted(webView)
-                val jsonObject: JSONObject = when (initialContext) {
-                    is String -> {
-                        try {
-                            JSONObject(initialContext)
-                        } catch (ex: JSONException) {
-                            throw Error("initialContext must be a JSON string or a Map")
-                        }
-                    }
-                    is Map<*, *> -> {
-                        JSONObject(initialContext.toMap())
-                    }
-                    else -> {
-                        throw Error("initialContext must be a JSON string or a Map")
+        val jsonObject: JSONObject = when (initialContext) {
+            is String -> {
+                try {
+                    JSONObject(initialContext)
+                } catch (ex: JSONException) {
+                    throw Error("initialContext must be a JSON string or a Map")
+                }
+            }
+            is Map<*, *> -> {
+                JSONObject(initialContext.toMap())
+            }
+            else -> {
+                throw Error("initialContext must be a JSON string or a Map")
+            }
+        }
+        val portalInitialContext = "{ \"name\": \"" + portal?.name + "\"," +
+                " \"value\": " + jsonObject.toString() + " } "
+
+        val newWebViewClient = object: BridgeWebViewClient(bridge) {
+            override fun shouldInterceptRequest(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): WebResourceResponse? {
+                view?.post {
+                    run {
+                        view.evaluateJavascript(
+                            "window.portalInitialContext = $portalInitialContext", null
+                        )
                     }
                 }
-                val portalInitialContext = "{ \"name\": \"" + portal?.name + "\"," +
-                        " \"value\": " + jsonObject.toString() +
-                        " } "
-                webView!!.evaluateJavascript(
-                    "window.portalInitialContext = $portalInitialContext", null
-                )
+
+                return super.shouldInterceptRequest(view, request)
             }
         }
 
-        webViewListeners.add(listener)
+        bridge?.webView?.webViewClient = newWebViewClient
     }
 
     /**
