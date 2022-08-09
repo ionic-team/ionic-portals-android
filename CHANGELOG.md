@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.1]() (2022-06-24)
+
+* fix: fixed race condition when loading fragment with initialContext
+
+
+
+
+
+
 # [0.6.0]() (2022-06-24)
 
 * feat: allow an initialContext to be set on PortalFragment
