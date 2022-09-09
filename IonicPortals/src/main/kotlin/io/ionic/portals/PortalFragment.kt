@@ -55,6 +55,7 @@ open class PortalFragment : Fragment {
         super.onDestroy()
         if (bridge != null) {
             bridge?.onDestroy()
+            bridge?.onDetachedFromWindow()
         }
         for ((topic, ref) in subscriptions) {
             PortalsPlugin.unsubscribe(topic, ref)
