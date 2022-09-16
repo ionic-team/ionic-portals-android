@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.3]() (2022-09-09)
+
+* chore: update dependency versions to capacitor 3.7.0 and liveupdates 0.1.1
+
+
+
+
+
+
 # [0.6.2]() (2022-09-09)
 
 * fix: added webview destroy call to PortalFragment
