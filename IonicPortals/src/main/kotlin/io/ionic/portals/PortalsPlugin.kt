@@ -11,10 +11,8 @@ class PortalsPlugin : Plugin() {
     companion object {
         @JvmStatic
         var subscriptions = mutableMapOf<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
-
         @JvmStatic
         var subscriptionRef = 0
-        
         @JvmStatic
         fun publish(topic: String, data: Any?) {
             subscriptions[topic]?.let {
