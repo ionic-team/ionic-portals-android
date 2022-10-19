@@ -2,6 +2,7 @@ package io.ionic.portals
 
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
+import org.json.JSONException
 import org.json.JSONObject
 
 @CapacitorPlugin(name = "Portals")
@@ -12,11 +13,10 @@ class PortalsPlugin : Plugin() {
         var subscriptions = mutableMapOf<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
         @JvmStatic
         var subscriptionRef = 0
-
         @JvmStatic
-        fun publish(topic: String, data: Any) {
+        fun publish(topic: String, data: Any?) {
             subscriptions[topic]?.let {
-                for((ref, listener) in it) {
+                for ((ref, listener) in it) {
                     val result = SubscriptionResult(topic, data, ref)
                     listener(result)
                 }
@@ -37,9 +37,7 @@ class PortalsPlugin : Plugin() {
 
         @JvmStatic
         fun unsubscribe(topic: String, subscriptionRef: Int) {
-            subscriptions[topic]?.let { subscription ->
-                subscription.remove(subscriptionRef)
-            }
+            subscriptions[topic]?.remove(subscriptionRef)
         }
     }
 
@@ -49,7 +47,13 @@ class PortalsPlugin : Plugin() {
             call.reject("topic not provided")
             return
         }
-        val data = call.data.get("data");
+
+        val data = try {
+            call.data.get("data")
+        } catch (e: JSONException) {
+            null
+        }
+
         PortalsPlugin.publish(topic, data)
         call.resolve()
     }
@@ -83,7 +87,6 @@ class PortalsPlugin : Plugin() {
         PortalsPlugin.unsubscribe(topic, subscriptionRef)
         call.resolve()
     }
-
 }
 
 fun JSONObject.toMap(): Map<String, Any> {
@@ -94,11 +97,7 @@ fun JSONObject.toMap(): Map<String, Any> {
     return map
 }
 
-data class SubscriptionResult(
-    val topic: String,
-    val data: Any,
-    val subscriptionRef: Int
-) {
+data class SubscriptionResult(val topic: String, val data: Any?, val subscriptionRef: Int) {
     fun toJSObject(): JSObject {
         val jsObject = JSObject()
         jsObject.put("topic", this.topic)
