@@ -157,26 +157,25 @@ open class PortalFragment : Fragment {
                         config = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
                     }
 
-                    bridge = Bridge.Builder(this)
+                    var bridgeBuilder = Bridge.Builder(this)
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)
                         .setConfig(config)
-                        .addWebViewListeners(webViewListeners)
-                        .create()
-
-                    setupInitialContextListener()
+                        .addWebViewListeners(webViewListeners);
 
                     if (portal?.liveUpdateConfig != null) {
                         liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
-                        if (liveUpdateFiles != null) {
-                            bridge?.serverBasePath = liveUpdateFiles!!.path
+                        bridgeBuilder = if (liveUpdateFiles != null) {
+                            bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
                         } else {
-                            bridge?.setServerAssetPath(startDir)
+                            bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                         }
                     } else {
-                        bridge?.setServerAssetPath(startDir)
+                        bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
 
+                    bridge = bridgeBuilder.create()
+                    setupInitialContextListener()
                     keepRunning = bridge?.shouldKeepRunning()!!
                 }
             }
