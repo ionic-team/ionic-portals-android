@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: io.ionic:liveupdates:0.1.1@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f9bb7720a05541c9cee23d80df6ef96c/transformed/liveupdates-0.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2f34611db4ef8f7d690d94176507a317/transformed/liveupdates-0.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2f34611db4ef8f7d690d94176507a317/transformed/liveupdates-0.1.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/2f34611db4ef8f7d690d94176507a317/transformed/liveupdates-0.1.1/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.ionic/liveupdates/0.1.1/eaa866173e420e0d7730b28ae20731d467b7ff47/liveupdates-0.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
