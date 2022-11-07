@@ -192,24 +192,27 @@ open class PortalFragment : Fragment {
     }
 
     private fun setupInitialContextListener() {
-        val initialContext = this.initialContext ?: portal?.initialContext ?: return
-        val jsonObject: JSONObject = when (initialContext) {
-            is String -> {
-                try {
-                    JSONObject(initialContext)
-                } catch (ex: JSONException) {
+        val initialContext = this.initialContext ?: portal?.initialContext
+        val portalInitialContext = if (initialContext != null) {
+            val jsonObject: JSONObject = when (initialContext) {
+                is String -> {
+                    try {
+                        JSONObject(initialContext)
+                    } catch (ex: JSONException) {
+                        throw Error("initialContext must be a JSON string or a Map")
+                    }
+                }
+                is Map<*, *> -> {
+                    JSONObject(initialContext.toMap())
+                }
+                else -> {
                     throw Error("initialContext must be a JSON string or a Map")
                 }
             }
-            is Map<*, *> -> {
-                JSONObject(initialContext.toMap())
-            }
-            else -> {
-                throw Error("initialContext must be a JSON string or a Map")
-            }
+            "{ \"name\": \"" + portal?.name + "\"," + " \"value\": " + jsonObject.toString() + " } "
+        } else {
+            "{ \"name\": \"" + portal?.name + "\"" + " } "
         }
-        val portalInitialContext = "{ \"name\": \"" + portal?.name + "\"," +
-                " \"value\": " + jsonObject.toString() + " } "
 
         val newWebViewClient = object: BridgeWebViewClient(bridge) {
             override fun shouldInterceptRequest(
