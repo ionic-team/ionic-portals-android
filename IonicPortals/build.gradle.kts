@@ -5,6 +5,10 @@ plugins {
     kotlin("android")
 }
 
+if (System.getenv("PORTALS_PUBLISH") == "true") {
+    apply(from = file("./scripts/publish-module.gradle"))
+}
+
 android {
     compileSdk = 30
 
