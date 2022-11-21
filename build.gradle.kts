@@ -1,5 +1,5 @@
 buildscript {
-    val kotlinVersion = "1.5.31"
+    val kotlinVersion = "1.6.21"
     extra.apply {
         set("kotlinVersion", kotlinVersion)
     }
@@ -16,7 +16,7 @@ buildscript {
             classpath("io.github.gradle-nexus:publish-plugin:1.1.0")
         }
 
-        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.android.tools.build:gradle:7.2.2")
         classpath(kotlin("gradle-plugin", version = kotlinVersion))
         classpath(kotlin("serialization", version = kotlinVersion))
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -32,7 +32,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
 }
 
