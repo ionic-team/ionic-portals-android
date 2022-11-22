@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0]() (2022-11-22)
+
+* feat: update to Capacitor 4.0 and kotlin 1.8 and Gradle dependency updates
+* feat: Always have an initialContext
+
+
+
+
+
 # [0.6.4]() (2022-10-21)
 
 * fix: update Capacitor dependency with web asset load flash fix
