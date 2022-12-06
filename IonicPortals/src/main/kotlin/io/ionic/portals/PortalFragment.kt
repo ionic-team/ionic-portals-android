@@ -26,6 +26,7 @@ open class PortalFragment : Fragment {
     private var bridge: Bridge? = null
     private var keepRunning = true
     private val initialPlugins: MutableList<Class<out Plugin?>> = ArrayList()
+    private val initialPluginInstances: MutableList<Plugin> = ArrayList()
     private var config: CapConfig? = null
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
@@ -87,6 +88,10 @@ open class PortalFragment : Fragment {
 
     fun addPlugin(plugin: Class<out Plugin?>?) {
         initialPlugins.add(plugin!!)
+    }
+
+    fun addPluginInstance(plugin: Plugin) {
+        initialPluginInstances.add(plugin)
     }
 
     fun setConfig(config: CapConfig?) {
@@ -152,6 +157,7 @@ open class PortalFragment : Fragment {
                 if (portal != null) {
                     val startDir: String = portal?.startDir!!
                     initialPlugins.addAll(portal?.plugins!!)
+                    initialPluginInstances.addAll(portal?.pluginInstances!!)
 
                     if(config == null) {
                         config = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
@@ -160,6 +166,7 @@ open class PortalFragment : Fragment {
                     var bridgeBuilder = Bridge.Builder(this)
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)
+                        .addPluginInstances(initialPluginInstances)
                         .setConfig(config)
                         .addWebViewListeners(webViewListeners);
 
