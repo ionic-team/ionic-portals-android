@@ -22,6 +22,13 @@ class Portal(
     internal val plugins = ArrayList<Class<out Plugin?>>()
 
     /**
+     * Get the list of Capacitor [Plugin] instances added to the Portal.
+     *
+     * @return The list of plugins registered with the Portal.
+     */
+    internal val pluginInstances = ArrayList<Plugin>()
+
+    /**
      * Initialize the Portal and add the PortalsPlugin by default.
      */
     init {
@@ -77,12 +84,30 @@ class Portal(
     /**
      * Add multiple Capacitor [Plugin] to be loaded with this Portal.
      *
-     * @param plugin A Plugin to be used with the Portal.
+     * @param plugins A list of Plugins to be used with the Portal.
      */
     fun addPlugins(plugins: List<Class<out Plugin?>>) {
         plugins.forEach {
             this.addPlugin(it)
         }
+    }
+
+    /**
+     * Add a Capacitor [Plugin] instance to be loaded with this Portal.
+     *
+     * @param plugin A Plugin instance to be used with the Portal.
+     */
+    fun addPluginInstance(plugin: Plugin) {
+        pluginInstances.add(plugin)
+    }
+
+    /**
+     * Add multiple Capacitor [Plugin] instances to be loaded with this Portal.
+     *
+     * @param plugins A list of Plugin instances to be used with the Portal.
+     */
+    fun addPluginInstances(plugins: List<Plugin>) {
+        pluginInstances.addAll(plugins)
     }
 
     /**
@@ -108,6 +133,7 @@ class Portal(
 class PortalBuilder(val name: String) {
     private var _startDir: String? = null
     private var plugins = mutableListOf<Class<out Plugin?>>()
+    private var pluginInstances = mutableListOf<Plugin>()
     private var initialContext: Any? = null
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
@@ -124,6 +150,11 @@ class PortalBuilder(val name: String) {
 
     fun addPlugin(plugin: Class<out Plugin?>): PortalBuilder {
         plugins.add(plugin)
+        return this
+    }
+
+    fun addPluginInstance(plugin: Plugin): PortalBuilder {
+        pluginInstances.add(plugin)
         return this
     }
 
@@ -158,6 +189,7 @@ class PortalBuilder(val name: String) {
         val portal = Portal(name)
         portal.startDir = this._startDir ?: this.name
         portal.addPlugins(plugins)
+        portal.addPluginInstances(pluginInstances)
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
