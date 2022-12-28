@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.1]() (2022-12-28)
+
+* feat: plugin instance support
+* fix: remove test class
+
+
+
+
+
 # [0.7.0]() (2022-11-22)
 
 * feat: update to Capacitor 4.0 and kotlin 1.8 and Gradle dependency updates
