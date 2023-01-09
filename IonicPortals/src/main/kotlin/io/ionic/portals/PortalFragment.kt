@@ -22,6 +22,7 @@ open class PortalFragment : Fragment {
     val PORTAL_NAME = "PORTALNAME"
     var portal: Portal? = null
     var liveUpdateFiles: File? = null
+    var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
 
     private var bridge: Bridge? = null
     private var keepRunning = true
@@ -36,6 +37,11 @@ open class PortalFragment : Fragment {
 
     constructor(portal: Portal?) {
         this.portal = portal
+    }
+
+    constructor(portal: Portal?, onBridgeAvailable: (bridge: Bridge) -> Unit) {
+        this.portal = portal
+        this.onBridgeAvailable = onBridgeAvailable
     }
 
     override fun onCreateView(
@@ -184,6 +190,8 @@ open class PortalFragment : Fragment {
                     bridge = bridgeBuilder.create()
                     setupInitialContextListener()
                     keepRunning = bridge?.shouldKeepRunning()!!
+
+                    onBridgeAvailable?.let { onBridgeAvailable -> bridge?.let { bridge -> onBridgeAvailable(bridge)} }
                 }
             }
         } else if (PortalManager.isRegisteredError()) {
