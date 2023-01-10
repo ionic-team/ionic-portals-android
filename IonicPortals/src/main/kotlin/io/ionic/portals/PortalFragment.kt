@@ -22,6 +22,7 @@ open class PortalFragment : Fragment {
     val PORTAL_NAME = "PORTALNAME"
     var portal: Portal? = null
     var liveUpdateFiles: File? = null
+    var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
     var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     private var bridge: Bridge? = null
@@ -39,8 +40,13 @@ open class PortalFragment : Fragment {
         this.portal = portal
     }
 
-    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) {
+    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) : this(portal, null, webVitalsCallback)
+
+    constructor(portal: Portal?, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(portal, onBridgeAvailable, null)
+
+    constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)?) {
         this.portal = portal
+        this.onBridgeAvailable = onBridgeAvailable
         this.webVitalsCallback = webVitalsCallback
     }
 
@@ -190,6 +196,8 @@ open class PortalFragment : Fragment {
                     bridge = bridgeBuilder.create()
                     setupPortalsJS()
                     keepRunning = bridge?.shouldKeepRunning()!!
+
+                    onBridgeAvailable?.let { onBridgeAvailable -> bridge?.let { bridge -> onBridgeAvailable(bridge)} }
                 }
             }
         } else if (PortalManager.isRegisteredError()) {
