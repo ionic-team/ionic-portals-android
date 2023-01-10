@@ -31,11 +31,17 @@ open class PortalFragment : Fragment {
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
     private var initialContext: Any? = null
+    private var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     constructor()
 
     constructor(portal: Portal?) {
         this.portal = portal
+    }
+
+    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) {
+        this.portal = portal
+        this.webVitalsCallback = webVitalsCallback
     }
 
     override fun onCreateView(
@@ -182,7 +188,7 @@ open class PortalFragment : Fragment {
                     }
 
                     bridge = bridgeBuilder.create()
-                    setupInitialContextListener()
+                    setupPortalsJS()
                     keepRunning = bridge?.shouldKeepRunning()!!
                 }
             }
@@ -198,7 +204,7 @@ open class PortalFragment : Fragment {
         }
     }
 
-    private fun setupInitialContextListener() {
+    private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
         val portalInitialContext = if (initialContext != null) {
             val jsonObject: JSONObject = when (initialContext) {
@@ -221,13 +227,34 @@ open class PortalFragment : Fragment {
             "{ \"name\": \"" + portal?.name + "\"" + " } "
         }
 
+        // Add interface for WebVitals interaction
+        webVitalsCallback?.let { webvitalsCallback ->
+            bridge?.webView?.addJavascriptInterface(WebVitals(portal!!.name, webvitalsCallback), "WebVitals")
+        }
+
         val newWebViewClient = object: BridgeWebViewClient(bridge) {
+            var hasMainRun = false
+            var hasBeenSetup = false
+
             override fun shouldInterceptRequest(
                 view: WebView?,
                 request: WebResourceRequest?
             ): WebResourceResponse? {
                 view?.post {
                     run {
+                        if (!hasBeenSetup && hasMainRun) {
+                            // Add WebVitals javascript to the webview
+                            webVitalsCallback?.let { webvitalsCallback ->
+                                view.evaluateJavascript(WebVitals(portal!!.name, webvitalsCallback).js, null)
+                            }
+
+
+                            hasBeenSetup = true
+                        }
+
+                        hasMainRun = true
+
+                        // Add initial context to the webview
                         view.evaluateJavascript(
                             "window.portalInitialContext = $portalInitialContext", null
                         )
