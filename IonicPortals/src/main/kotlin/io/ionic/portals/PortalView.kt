@@ -43,6 +43,9 @@ class PortalView : FrameLayout {
     constructor(context: Context, portalId: String, webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", null, webVitalsCallback)
 
     // Provided for Compose
+    constructor(context: Context, portalId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit), webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", onBridgeAvailable, webVitalsCallback)
+
+    // Provided for Compose
     constructor(context: Context, portalId: String, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((metric: WebVitals.Metric, long: Long) -> Unit)?) : super(context) {
         this.webVitalsCallback = webVitalsCallback
         this.onBridgeAvailable = onBridgeAvailable
