@@ -40,9 +40,9 @@ open class PortalFragment : Fragment {
         this.portal = portal
     }
 
-    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) : this(portal, null, webVitalsCallback)
-
     constructor(portal: Portal?, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(portal, onBridgeAvailable, null)
+
+    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) : this(portal, null, webVitalsCallback)
 
     constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)?) {
         this.portal = portal
