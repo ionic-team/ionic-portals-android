@@ -24,6 +24,7 @@ class PortalView : FrameLayout {
     // drawing order.
     private var mDrawDisappearingViewsFirst = true
     private var portalFragment: PortalFragment? = null
+    private var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
     var portalId: String? = null
     var viewId: String? = null
     var tag: String? = null
@@ -31,10 +32,14 @@ class PortalView : FrameLayout {
     constructor(context: Context) : super(context)
 
     // Provided for Compose
-    constructor(context: Context, portalId: String) : this(context, portalId, portalId+"_view")
+    constructor(context: Context, portalId: String) : this(context, portalId, portalId+"_view", null)
 
     // Provided for Compose
-    constructor(context: Context, portalId: String, viewId: String) : super(context) {
+    constructor(context: Context, portalId: String, webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", webVitalsCallback)
+
+    // Provided for Compose
+    constructor(context: Context, portalId: String, viewId: String, webVitalsCallback: ((metric: WebVitals.Metric, long: Long) -> Unit)?) : super(context) {
+        this.webVitalsCallback = webVitalsCallback
         this.portalId = portalId
         this.viewId = viewId
         this.id = View.generateViewId()
@@ -51,6 +56,16 @@ class PortalView : FrameLayout {
         attrs,
         defStyleAttr
     ) {
+        readAttributes(context, attrs)
+        loadPortal(context, attrs)
+    }
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, webVitalsCallback: (metric: WebVitals.Metric, long: Long) -> Unit) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+        this.webVitalsCallback = webVitalsCallback
         readAttributes(context, attrs)
         loadPortal(context, attrs)
     }
@@ -114,8 +129,9 @@ class PortalView : FrameLayout {
             ) as PortalFragment
 
             portalFragment?.portal = portal
-            attrs?.let {
-                portalFragment?.onInflate(context, it, null)
+            portalFragment?.webVitalsCallback = this.webVitalsCallback
+            attrs?.let { attributeSet ->
+                portalFragment?.onInflate(context, attributeSet, null)
             }
             val handler = Handler()
             val runnable = Runnable {

@@ -22,6 +22,7 @@ open class PortalFragment : Fragment {
     val PORTAL_NAME = "PORTALNAME"
     var portal: Portal? = null
     var liveUpdateFiles: File? = null
+    var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     private var bridge: Bridge? = null
     private var keepRunning = true
@@ -31,7 +32,6 @@ open class PortalFragment : Fragment {
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
     private var initialContext: Any? = null
-    private var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     constructor()
 
