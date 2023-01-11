@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.3]() (2023-01-11)
+
+* feat: added jetpack compose support for bridge availability callback
+* feat: Web Vitals support for FCP, FID, TTFB
+
+
+
+
+
 # [0.7.2]() (2023-01-09)
 
 * feat: callback when bridge is created
