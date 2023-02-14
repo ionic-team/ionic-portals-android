@@ -181,6 +181,12 @@ open class PortalFragment : Fragment {
                         bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
 
+                    portal?.assetMaps?.let {
+                        if (it.isNotEmpty()) {
+                            bridgeBuilder = bridgeBuilder.setRouteProcessor(PortalsRouteProcessor(requireContext(),it))
+                        }
+                    }
+
                     bridge = bridgeBuilder.create()
                     setupInitialContextListener()
                     keepRunning = bridge?.shouldKeepRunning()!!
