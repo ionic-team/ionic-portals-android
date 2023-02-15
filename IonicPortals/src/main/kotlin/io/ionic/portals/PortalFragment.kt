@@ -206,8 +206,12 @@ open class PortalFragment : Fragment {
 
     private fun setupInitialContextListener() {
         val initialContext = this.initialContext ?: portal?.initialContext
-        val portalInitialContext = if (initialContext != null) {
-            val jsonObject: JSONObject = when (initialContext) {
+
+        val portalInitialContext = JSONObject()
+        portalInitialContext.put("name", portal?.name)
+
+        if(initialContext != null) {
+            val initialContextValues: JSONObject = when (initialContext) {
                 is String -> {
                     try {
                         JSONObject(initialContext)
@@ -222,9 +226,18 @@ open class PortalFragment : Fragment {
                     throw Error("initialContext must be a JSON string or a Map")
                 }
             }
-            "{ \"name\": \"" + portal?.name + "\"," + " \"value\": " + jsonObject.toString() + " } "
-        } else {
-            "{ \"name\": \"" + portal?.name + "\"" + " } "
+
+            portalInitialContext.put("value", initialContextValues)
+        }
+
+        portal?.assetMaps?.let { assetmaps ->
+            if (assetmaps.isNotEmpty()) {
+                val assetMapsJSON = JSONObject()
+                for ((_, assetmap) in assetmaps) {
+                    assetMapsJSON.put(assetmap.name, assetmap.virtualPath)
+                }
+                portalInitialContext.put("assets", assetMapsJSON)
+            }
         }
 
         val newWebViewClient = object: BridgeWebViewClient(bridge) {
