@@ -31,6 +31,6 @@ class AssetMap {
     }
 
     fun getAssetPath(): String {
-        return "$prefix$path"
+        return path
     }
 }

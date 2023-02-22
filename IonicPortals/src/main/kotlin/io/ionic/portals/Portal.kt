@@ -175,7 +175,7 @@ class PortalBuilder(val name: String) {
     }
 
     fun addAssetMap(assetMap: AssetMap): PortalBuilder {
-        assetMaps.put(assetMap.assetPath, assetMap)
+        assetMaps.put(assetMap.getAssetPath(), assetMap)
         return this
     }
 
