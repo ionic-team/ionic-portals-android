@@ -171,29 +171,57 @@ open class PortalFragment : Fragment {
                     initialPlugins.addAll(portal?.plugins!!)
                     initialPluginInstances.addAll(portal?.pluginInstances!!)
 
-                    if(config == null) {
-                        config = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    var configToUse : CapConfig? = null
+                    if(config != null) {
+                        // If application is provided a programmatic config, opt to use that above all other options
+                        configToUse = config
                     }
 
                     var bridgeBuilder = Bridge.Builder(this)
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)
                         .addPluginInstances(initialPluginInstances)
-                        .setConfig(config)
                         .addWebViewListeners(webViewListeners);
 
                     if (portal?.liveUpdateConfig != null) {
                         liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
                         bridgeBuilder = if (liveUpdateFiles != null) {
+                            if (config == null) {
+                                val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
+                                if(configFile.exists()) {
+                                    configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
+                                }
+                            }
+
                             bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
                         } else {
+                            if (config == null) {
+                                try {
+                                    val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                                    configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
+                                } catch (_: Exception) {}
+                            }
+
                             bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                         }
                     } else {
+                        if (config == null) {
+                            try {
+                                val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                                configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
+                            } catch (_: Exception) {}
+                        }
+
                         bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
 
+                    if(configToUse == null) {
+                        configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    }
+
+                    bridgeBuilder = bridgeBuilder.setConfig(configToUse)
                     bridge = bridgeBuilder.create()
+
                     setupPortalsJS()
                     keepRunning = bridge?.shouldKeepRunning()!!
 
