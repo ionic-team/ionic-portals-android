@@ -7,7 +7,7 @@
 </div>
 <br />
 <p align="center">
-  <a href="https://github.com/ionic-team/ionic-portals/actions?query=workflow%3ACI"><img src="https://img.shields.io/github/workflow/status/ionic-team/ionic-portals/CI?style=flat-square" /></a>
+  <a href="https://github.com/ionic-team/ionic-portals-android/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ionic-team/ionic-portals-android/ci.yml?branch=main&style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/@ionic/portals"><img src="https://img.shields.io/npm/dw/@ionic/portals?style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/@ionic/portals"><img src="https://img.shields.io/npm/l/@ionic/portals?style=flat-square" /></a>
 </p>
@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <a href="https://ionic.io/docs/portals"><img src="https://img.shields.io/static/v1?label=docs&message=ionic.io/portals&color=blue&style=flat-square" /></a>
-  <a href="https://twitter.com/ionicframework"><img src="https://img.shields.io/twitter/follow/ionicframework" /></a>
+  <a href="https://twitter.com/ionicframework"><img src="https://img.shields.io/badge/follow-%40ionicframework-1DA1F2?logo=twitter" alt="Follow @ionicframework"></a>
 </p>
 
 ---

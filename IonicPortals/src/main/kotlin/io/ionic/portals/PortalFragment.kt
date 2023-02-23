@@ -22,6 +22,8 @@ open class PortalFragment : Fragment {
     val PORTAL_NAME = "PORTALNAME"
     var portal: Portal? = null
     var liveUpdateFiles: File? = null
+    var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
+    var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     private var bridge: Bridge? = null
     private var keepRunning = true
@@ -36,6 +38,16 @@ open class PortalFragment : Fragment {
 
     constructor(portal: Portal?) {
         this.portal = portal
+    }
+
+    constructor(portal: Portal?, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(portal, onBridgeAvailable, null)
+
+    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) : this(portal, null, webVitalsCallback)
+
+    constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)?) {
+        this.portal = portal
+        this.onBridgeAvailable = onBridgeAvailable
+        this.webVitalsCallback = webVitalsCallback
     }
 
     override fun onCreateView(
@@ -159,25 +171,47 @@ open class PortalFragment : Fragment {
                     initialPlugins.addAll(portal?.plugins!!)
                     initialPluginInstances.addAll(portal?.pluginInstances!!)
 
-                    if(config == null) {
-                        config = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    var configToUse : CapConfig? = null
+                    if(config != null) {
+                        // If application is provided a programmatic config, opt to use that above all other options
+                        configToUse = config
                     }
 
                     var bridgeBuilder = Bridge.Builder(this)
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)
                         .addPluginInstances(initialPluginInstances)
-                        .setConfig(config)
                         .addWebViewListeners(webViewListeners);
 
                     if (portal?.liveUpdateConfig != null) {
                         liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
                         bridgeBuilder = if (liveUpdateFiles != null) {
+                            if (config == null) {
+                                val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
+                                if(configFile.exists()) {
+                                    configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
+                                }
+                            }
+
                             bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
                         } else {
+                            if (config == null) {
+                                try {
+                                    val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                                    configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
+                                } catch (_: Exception) {}
+                            }
+
                             bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                         }
                     } else {
+                        if (config == null) {
+                            try {
+                                val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                                configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
+                            } catch (_: Exception) {}
+                        }
+
                         bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
 
@@ -187,9 +221,17 @@ open class PortalFragment : Fragment {
                         }
                     }
 
+                    if(configToUse == null) {
+                        configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    }
+
+                    bridgeBuilder = bridgeBuilder.setConfig(configToUse)
                     bridge = bridgeBuilder.create()
-                    setupInitialContextListener()
+
+                    setupPortalsJS()
                     keepRunning = bridge?.shouldKeepRunning()!!
+
+                    onBridgeAvailable?.let { onBridgeAvailable -> bridge?.let { bridge -> onBridgeAvailable(bridge)} }
                 }
             }
         } else if (PortalManager.isRegisteredError()) {
@@ -204,7 +246,7 @@ open class PortalFragment : Fragment {
         }
     }
 
-    private fun setupInitialContextListener() {
+    private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
 
         val portalInitialContext = JSONObject()
@@ -240,13 +282,34 @@ open class PortalFragment : Fragment {
             }
         }
 
+        // Add interface for WebVitals interaction
+        webVitalsCallback?.let { webvitalsCallback ->
+            bridge?.webView?.addJavascriptInterface(WebVitals(portal!!.name, webvitalsCallback), "WebVitals")
+        }
+
         val newWebViewClient = object: BridgeWebViewClient(bridge) {
+            var hasMainRun = false
+            var hasBeenSetup = false
+
             override fun shouldInterceptRequest(
                 view: WebView?,
                 request: WebResourceRequest?
             ): WebResourceResponse? {
                 view?.post {
                     run {
+                        if (!hasBeenSetup && hasMainRun) {
+                            // Add WebVitals javascript to the webview
+                            webVitalsCallback?.let { webvitalsCallback ->
+                                view.evaluateJavascript(WebVitals(portal!!.name, webvitalsCallback).js, null)
+                            }
+
+
+                            hasBeenSetup = true
+                        }
+
+                        hasMainRun = true
+
+                        // Add initial context to the webview
                         view.evaluateJavascript(
                             "window.portalInitialContext = $portalInitialContext", null
                         )
