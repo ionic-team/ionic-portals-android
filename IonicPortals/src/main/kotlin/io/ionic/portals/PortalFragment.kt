@@ -215,6 +215,12 @@ open class PortalFragment : Fragment {
                         bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
 
+                    portal?.assetMaps?.let {
+                        if (it.isNotEmpty()) {
+                            bridgeBuilder = bridgeBuilder.setRouteProcessor(PortalsRouteProcessor(requireContext(),it))
+                        }
+                    }
+
                     if(configToUse == null) {
                         configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
                     }
@@ -242,8 +248,12 @@ open class PortalFragment : Fragment {
 
     private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
-        val portalInitialContext = if (initialContext != null) {
-            val jsonObject: JSONObject = when (initialContext) {
+
+        val portalInitialContext = JSONObject()
+        portalInitialContext.put("name", portal?.name)
+
+        if(initialContext != null) {
+            val initialContextValues: JSONObject = when (initialContext) {
                 is String -> {
                     try {
                         JSONObject(initialContext)
@@ -258,9 +268,18 @@ open class PortalFragment : Fragment {
                     throw Error("initialContext must be a JSON string or a Map")
                 }
             }
-            "{ \"name\": \"" + portal?.name + "\"," + " \"value\": " + jsonObject.toString() + " } "
-        } else {
-            "{ \"name\": \"" + portal?.name + "\"" + " } "
+
+            portalInitialContext.put("value", initialContextValues)
+        }
+
+        portal?.assetMaps?.let { assetmaps ->
+            if (assetmaps.isNotEmpty()) {
+                val assetMapsJSON = JSONObject()
+                for ((_, assetmap) in assetmaps) {
+                    assetMapsJSON.put(assetmap.name, assetmap.virtualPath)
+                }
+                portalInitialContext.put("assets", assetMapsJSON)
+            }
         }
 
         // Add interface for WebVitals interaction

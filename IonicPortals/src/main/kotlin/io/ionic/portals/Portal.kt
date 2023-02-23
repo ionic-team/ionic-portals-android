@@ -5,6 +5,7 @@ import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 class Portal(
     /**
@@ -27,6 +28,11 @@ class Portal(
      * @return The list of plugins registered with the Portal.
      */
     internal val pluginInstances = ArrayList<Plugin>()
+
+    /**
+     * Get the list of Asset Maps registered with the Portal
+     */
+    internal var assetMaps = LinkedHashMap<String, AssetMap>()
 
     /**
      * Initialize the Portal and add the PortalsPlugin by default.
@@ -111,6 +117,15 @@ class Portal(
     }
 
     /**
+     * Add multiple [AssetMap] instances to be loaded with this Portal.
+     *
+     * @param assetMaps A list of Plugin instances to be used with the Portal.
+     */
+    fun addAssetMaps(assetMaps: LinkedHashMap<String, AssetMap>) {
+        this.assetMaps.putAll(assetMaps)
+    }
+
+    /**
      * Sets the initial context to pass to the webview
      *
      * @param initialContext A map containing key/pair values that will be converted to a JavaScript object in the webview.
@@ -134,6 +149,7 @@ class PortalBuilder(val name: String) {
     private var _startDir: String? = null
     private var plugins = mutableListOf<Class<out Plugin?>>()
     private var pluginInstances = mutableListOf<Plugin>()
+    private var assetMaps = LinkedHashMap<String, AssetMap>()
     private var initialContext: Any? = null
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
@@ -158,6 +174,11 @@ class PortalBuilder(val name: String) {
         return this
     }
 
+    fun addAssetMap(assetMap: AssetMap): PortalBuilder {
+        assetMaps.put(assetMap.getAssetPath(), assetMap)
+        return this
+    }
+
     fun setInitialContext(initialContext: Any): PortalBuilder {
         this.initialContext = initialContext
         return this
@@ -165,6 +186,11 @@ class PortalBuilder(val name: String) {
 
     fun setPlugins(plugins: MutableList<Class<out Plugin?>>): PortalBuilder {
         this.plugins = plugins
+        return this
+    }
+
+    fun setAssetMaps(assetMaps: LinkedHashMap<String, AssetMap>): PortalBuilder {
+        this.assetMaps = assetMaps
         return this
     }
 
@@ -190,6 +216,7 @@ class PortalBuilder(val name: String) {
         portal.startDir = this._startDir ?: this.name
         portal.addPlugins(plugins)
         portal.addPluginInstances(pluginInstances)
+        portal.addAssetMaps(assetMaps)
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
