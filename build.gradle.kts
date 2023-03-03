@@ -38,6 +38,8 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    apply(plugin = "org.jetbrains.dokka")
 }
 
 // register Clean task
