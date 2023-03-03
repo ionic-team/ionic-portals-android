@@ -27,7 +27,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
       - name: Generate Docs
-        run: gradlew dokkaHtml
+        run: ./gradlew dokkaHtml
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::319312831725:role/github-docs
