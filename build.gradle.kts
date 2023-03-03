@@ -1,3 +1,7 @@
+plugins {
+    id("org.jetbrains.dokka") version "1.7.20"
+}
+
 buildscript {
     val kotlinVersion = "1.6.21"
     extra.apply {
@@ -11,6 +15,7 @@ buildscript {
             url = uri("https://plugins.gradle.org/m2/")
         }
     }
+
     dependencies {
         if (System.getenv("PORTALS_PUBLISH") == "true") {
             classpath("io.github.gradle-nexus:publish-plugin:1.1.0")
