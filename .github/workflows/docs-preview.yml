@@ -1,0 +1,38 @@
+name: Deploy docs PR preview
+
+on: pull_request
+
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+
+env:
+  SLUG: portals-android-api-ref-${{ github.event.number }}-${{ github.run_id }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: preview-${{ github.event.number }}
+      url: https://${{ env.SLUG }}.ionicpreview.com
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+      - name: Generate Docs
+        run: ./gradlew dokkaHtml
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::319312831725:role/github-docs
+          aws-region: us-east-1
+      - name: Deploy
+        run: |
+          aws s3 sync IonicPortals/build/dokka/html/ s3://ionic-docs/preview/${{ env.SLUG }}/ --exclude '*.html' --cache-control max-age=31536000 --only-show-errors
+          aws s3 sync IonicPortals/build/dokka/html/ s3://ionic-docs/preview/${{ env.SLUG }}/ --exclude '*' --include '*.html' --cache-control max-age=60 --only-show-errors
