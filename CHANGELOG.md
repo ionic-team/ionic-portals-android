@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.5]() (2023-04-03)
+
+* chore: update dependencies for Capacitor updates and Live Updates feat
+
+
+
+
+
 # [0.7.4]() (2023-02-27)
 
 * feat: support configuration files on portal-by-portal basis and within live updates
