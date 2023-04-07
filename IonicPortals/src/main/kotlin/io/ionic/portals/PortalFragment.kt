@@ -32,6 +32,7 @@ open class PortalFragment : Fragment {
     private var config: CapConfig? = null
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
+    private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
 
     constructor()
@@ -71,7 +72,7 @@ open class PortalFragment : Fragment {
             bridge?.onDetachedFromWindow()
         }
         for ((topic, ref) in subscriptions) {
-            PortalsPubSub.shared.unsubscribe(topic, ref)
+            pubSub.unsubscribe(topic, ref)
         }
     }
 
@@ -334,6 +335,7 @@ open class PortalFragment : Fragment {
      */
     @JvmOverloads
     fun linkMessageReceivers(messageReceiverParent: Any, pubSub: PortalsPubSub = PortalsPubSub.shared) {
+        this.pubSub = pubSub
         val members = messageReceiverParent.javaClass.kotlin.members.filter { it.annotations.any { annotation -> annotation is PortalMethod } }
 
         for (member in members) {
