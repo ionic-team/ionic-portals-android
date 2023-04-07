@@ -77,9 +77,7 @@ class PortalsPlugin(private val pubSub: PortalsPubSub = PortalsPubSub.shared) : 
 
     override fun handleOnDestroy() {
         super.handleOnDestroy()
-        Log.i("PUBSUB RECEIVED", "In handleOnDestroy")
         for ((key, ref) in subscriptionRefs) {
-            Log.i("PUBSUB RECEIVED", "Unsubscribing from $key for subRef $ref");
             pubSub.unsubscribe(key, ref)
         }
     }
