@@ -1,45 +1,50 @@
 package io.ionic.portals
 
+import android.util.Log
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
-@CapacitorPlugin(name = "Portals")
-class PortalsPlugin : Plugin() {
+class PortalsPubSub {
+    private var subscriptions = ConcurrentHashMap<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
+    private var subscriptionRef = AtomicInteger(0)
+
+    fun publish(topic: String, data: Any?) {
+        subscriptions[topic]?.let {
+            for ((ref, listener) in it) {
+                val result = SubscriptionResult(topic, data, ref)
+                listener(result)
+            }
+        }
+    }
+
+    fun subscribe(topic: String, callback: (result: SubscriptionResult) -> Unit): Int {
+        val ref = subscriptionRef.incrementAndGet()
+        subscriptions[topic]?.let { subscription ->
+            subscription[ref] = callback
+        } ?: run {
+            val subscription = mutableMapOf(ref to callback)
+            subscriptions[topic] = subscription
+        }
+        return ref
+    }
+
+    fun unsubscribe(topic: String, subscriptionRef: Int) {
+        subscriptions[topic]?.remove(subscriptionRef)
+    }
 
     companion object {
         @JvmStatic
-        var subscriptions = mutableMapOf<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
-        @JvmStatic
-        var subscriptionRef = 0
-        @JvmStatic
-        fun publish(topic: String, data: Any?) {
-            subscriptions[topic]?.let {
-                for ((ref, listener) in it) {
-                    val result = SubscriptionResult(topic, data, ref)
-                    listener(result)
-                }
-            }
-        }
-
-        @JvmStatic
-        fun subscribe(topic: String, callback: (result: SubscriptionResult) -> Unit): Int {
-            subscriptionRef++
-            subscriptions[topic]?.let { subscription ->
-                subscription[subscriptionRef] = callback
-            } ?: run {
-                val subscription = mutableMapOf(subscriptionRef to callback)
-                subscriptions[topic] = subscription
-            }
-            return subscriptionRef
-        }
-
-        @JvmStatic
-        fun unsubscribe(topic: String, subscriptionRef: Int) {
-            subscriptions[topic]?.remove(subscriptionRef)
-        }
+        val shared = PortalsPubSub()
     }
+}
+
+@CapacitorPlugin(name = "Portals")
+class PortalsPlugin(private val pubSub: PortalsPubSub = PortalsPubSub.shared) : Plugin() {
+    private val subscriptionRefs = ConcurrentHashMap<String, Int>()
 
     @PluginMethod(returnType = PluginMethod.RETURN_PROMISE)
     fun publishNative(call: PluginCall) {
@@ -54,38 +59,29 @@ class PortalsPlugin : Plugin() {
             null
         }
 
-        PortalsPlugin.publish(topic, data)
+        pubSub.publish(topic, data)
         call.resolve()
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
-    fun subscribeNative(call: PluginCall) {
-        val topic = call .getString("topic") ?: run {
-            call.reject("topic not provided")
-            return
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    override fun addListener(call: PluginCall?) {
+        super.addListener(call)
+        val topic = call?.getString("eventName") ?: return
+        if (subscriptionRefs[topic] != null)  { return }
+        val ref = pubSub.subscribe(topic) { result ->
+            notifyListeners(topic, result.toJSObject())
         }
-        call.setKeepAlive(true)
-        val ref = PortalsPlugin.subscribe(topic) { result ->
-            call.resolve(result.toJSObject())
-        }
-        val result = JSObject()
-        result.put("topic", topic)
-        result.put("subscriptionRef", ref)
-        call.resolve(result)
+
+        subscriptionRefs[topic] = ref
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_PROMISE)
-    fun unsubscribeNative(call: PluginCall) {
-        val topic = call .getString("topic") ?: run {
-            call.reject("topic not provided")
-            return
+    override fun handleOnDestroy() {
+        super.handleOnDestroy()
+        Log.i("PUBSUB RECEIVED", "In handleOnDestroy")
+        for ((key, ref) in subscriptionRefs) {
+            Log.i("PUBSUB RECEIVED", "Unsubscribing from $key for subRef $ref");
+            pubSub.unsubscribe(key, ref)
         }
-        val subscriptionRef = call .getInt("subscriptionRef") ?: run {
-            call.reject("subscriptionRef not provided")
-            return
-        }
-        PortalsPlugin.unsubscribe(topic, subscriptionRef)
-        call.resolve()
     }
 }
 
