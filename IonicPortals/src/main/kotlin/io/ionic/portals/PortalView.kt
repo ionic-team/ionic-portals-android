@@ -17,35 +17,70 @@ import androidx.fragment.app.FragmentTransaction
 import com.getcapacitor.Bridge
 import java.util.ArrayList
 
+/**
+ * A class that provides the ability to integrate Portals into XML Layout or Jetpack Compose files.
+ * PortalView extends [FrameLayout] and contains a [PortalFragment] to display the Portal content
+ * inside the view. Use this class like any other [View](https://developer.android.com/reference/android/view/View) class.
+ *
+ * Example usage:
+ * ```xml
+ * <?xml version="1.0" encoding="utf-8"?>
+ * <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ *     xmlns:tools="http://schemas.android.com/tools"
+ *     android:layout_width="match_parent"
+ *     android:layout_height="match_parent"
+ *     xmlns:app="http://schemas.android.com/apk/res-auto">
+ *
+ *     <io.ionic.portals.PortalView
+ *         app:portalId="help"
+ *         android:layout_width="match_parent"
+ *         android:layout_height="match_parent"/>
+ *
+ * </androidx.constraintlayout.widget.ConstraintLayout>
+ * ```
+ *
+ * Jetpack Composd example usage:
+ * ```kotlin
+ * @Composable
+ * fun loadPortal(portalId: String) {
+ *     AndroidView(factory = {
+ *         PortalView(it, portalId)
+ *     })
+ * }
+ * ```
+ *
+ * See our [getting started guide](https://ionic.io/docs/portals/for-android/getting-started#jetpack-compose)
+ * for more information about using Portals in Jetpack Compose.
+ */
 class PortalView : FrameLayout {
     private var mDisappearingFragmentChildren: ArrayList<View>? = null
     private var mTransitioningFragmentViews: ArrayList<View>? = null
-
-    // Used to indicate whether the FragmentContainerView should override the default ViewGroup
-    // drawing order.
     private var mDrawDisappearingViewsFirst = true
     private var portalFragment: PortalFragment? = null
     private var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
     private var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
+
+    /**
+     * The ID of the registered Portal to display.
+     */
     var portalId: String? = null
+
+    /**
+     * The ID of the Android view.
+     */
     var viewId: String? = null
+
+    /**
+     * The view tag.
+     */
     var tag: String? = null
 
     constructor(context: Context) : super(context)
-
-    // Provided for Compose
     constructor(context: Context, portalId: String) : this(context, portalId, portalId+"_view", null, null)
-
-    // Provided for Compose
     constructor(context: Context, portalId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)) : this(context, portalId, portalId+"_view", onBridgeAvailable, null)
-
-    // Provided for Compose
     constructor(context: Context, portalId: String, webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", null, webVitalsCallback)
-
-    // Provided for Compose
     constructor(context: Context, portalId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit), webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", onBridgeAvailable, webVitalsCallback)
 
-    // Provided for Compose
     constructor(context: Context, portalId: String, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((metric: WebVitals.Metric, long: Long) -> Unit)?) : super(context) {
         this.webVitalsCallback = webVitalsCallback
         this.onBridgeAvailable = onBridgeAvailable
@@ -79,16 +114,15 @@ class PortalView : FrameLayout {
         loadPortal(context, attrs)
     }
 
+    /**
+     * Get the Portal Fragment used in the view.
+     *
+     * @return the PortalFragment the view uses to display web content
+     */
     fun getPortalFragment(): PortalFragment? {
         return portalFragment
     }
 
-    /**
-     * Read attributes defined on the Portal View in the layout.
-     *
-     * @param context
-     * @param attrs
-     */
     private fun readAttributes(context: Context, attrs: AttributeSet) {
         val a = context.obtainStyledAttributes(attrs, R.styleable.PortalView, 0, 0)
         portalId = a.getString(R.styleable.PortalView_portalId)
@@ -97,6 +131,12 @@ class PortalView : FrameLayout {
         a.recycle()
     }
 
+    /**
+     * Loads the Portal content.
+     *
+     * @param context the Android [Context] used to load the Portal
+     * @param attrs the Attributes provided by XML to configure the view
+     */
     @Throws(Exception::class)
     fun loadPortal(context: Context, attrs: AttributeSet?) {
         if (context is Activity) {
@@ -105,6 +145,12 @@ class PortalView : FrameLayout {
         }
     }
 
+    /**
+     * Loads the Portal content.
+     *
+     * @param fm the [FragmentManager] used in displaying the [PortalFragment]
+     * @param attrs the Attributes provided by XML to configure the view
+     */
     @Throws(Exception::class)
     fun loadPortal(fm: FragmentManager, attrs: AttributeSet?) {
         val id = id
@@ -155,8 +201,6 @@ class PortalView : FrameLayout {
         }
     }
 
-
-
     /**
      * When called, this method throws a [UnsupportedOperationException] on APIs above 17.
      * On APIs 17 and below, it calls [FrameLayout.setLayoutTransition]
@@ -188,7 +232,6 @@ class PortalView : FrameLayout {
 
     /**
      * {@inheritDoc}
-     *
      *
      * The sys ui flags must be set to enable extending the layout into the window insets.
      */
@@ -245,7 +288,6 @@ class PortalView : FrameLayout {
         super.endViewTransition(view)
     }
 
-    // Used to indicate the container should change the default drawing order.
     fun setDrawDisappearingViewsLast(drawDisappearingViewsFirst: Boolean) {
         mDrawDisappearingViewsFirst = drawDisappearingViewsFirst
     }

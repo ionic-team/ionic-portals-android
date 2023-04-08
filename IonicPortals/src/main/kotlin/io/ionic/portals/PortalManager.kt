@@ -8,17 +8,38 @@ import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 
 /**
- * A singleton object for managing portals
+ * A class used to create and manage [Portal] instances. It follows a [Singleton Pattern](https://en.wikipedia.org/wiki/Singleton_pattern)
+ * to allow access to any [Portal](./portal) from anywhere in the application.
+ *
+ * Example usage:
+ * ```kotlin
+ * PortalManager.newPortal("my_portal")
+ *     .addPlugin(MyCapacitorPlugin::class.java)
+ *     .setPortalFragmentType(MyFadeInOutPortalFragment::class.java)
+ *     .setInitialContext(mapOf("myVariableFromAndroid" to 42))
+ *     .setStartDir("web_app")
+ *     .create()
+ * ```
+ *
+ * ```java
+ * PortalManager.newPortal("my_portal")
+ *     .addPlugin(MyCapacitorPlugin.class)
+ *     .setPortalFragmentType(MyFadeInOutPortalFragment.class)
+ *     .setInitialContext(Map.of("myVariableFromAndroid", 42))
+ *     .setStartDir("web_app")
+ *     .create();
+ * ```
  */
 object PortalManager {
-
     @JvmStatic private val portals: MutableMap<String, Portal> = mutableMapOf()
     @JvmStatic private var registered: Boolean = false
     @JvmStatic private var unregisteredMessageShown: Boolean = false
     @JvmStatic private var registeredError: Boolean = false
 
     /**
-     * Adds a Portal to the set of Portals.
+     * Adds a Portal to the Portal Manager. This is not necessary if the Portal is created using
+     * the [newPortal] function.
+     *
      * @param portal The Portal to add
      */
     @JvmStatic fun addPortal(portal: Portal) {
@@ -30,8 +51,18 @@ object PortalManager {
     }
 
     /**
-     * Returns a Portal object given the name of the portal.
-     * @param name The Portal name
+     * Returns a [Portal] object given the name of the portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val portal: Portal = PortalManager.getPortal("my_portal")
+     * ```
+     *
+     * ```java
+     * Portal portal = PortalManager.getPortal("my_portal");
+     * ```
+     *
+     * @param name the portal name
      * @throws NoSuchElementException throws this exception if the Portal does not exist
      */
     @JvmStatic fun getPortal(name: String): Portal {
@@ -42,12 +73,37 @@ object PortalManager {
         return portals[name] ?: throw IllegalStateException("Portal with portalId $name not found in PortalManager")
     }
 
+    /**
+     * Get the number of Portals managed by the Portal Manager.
+     *
+     * Example usage:
+     * ```kotlin
+     * val portalCount: Int = PortalManager.size()
+     * ```
+     *
+     * ```java
+     * int portalCount = PortalManager.size();
+     * ```
+     *
+     * @return how many Portals are managed by the Portal Manager
+     */
     @JvmStatic fun size(): Int {
         return portals.size
     }
 
     /**
-     * Register this application with your Portals account.
+     * Validate this copy of Portals with an API key. This function works offline and only needs to
+     * be run once before creating your first [Portal].
+     *
+     * Example usage:
+     * ```kotlin
+     * PortalManager.register("YOUR_PORTALS_KEY")
+     * ```
+     *
+     * ```java
+     * PortalManager.register("YOUR_PORTALS_KEY");
+     * ```
+     *
      * @param key The key for Portals provided by the Ionic dashboard
      */
     @JvmStatic fun register(key : String) {
@@ -56,16 +112,30 @@ object PortalManager {
 
     /**
      * Check if Portals has been successfully registered with a valid key.
-     * @return True if Portals is successfully registered
+     *
+     * @return true if Portals is successfully registered
      */
     @JvmStatic fun isRegistered(): Boolean {
         return registered
     }
 
     /**
-     * A helper method to build portal classes and add them to the manager. Classes built with newPortal are added to the PortalManager automatically.
-     * @param name The Portal name
-     * @return A PortalBuilder object that has a fluent API to construct a Portal
+     * A helper function to build portal classes and add them to the manager.
+     * Classes built with newPortal are added to the PortalManager automatically.
+     *
+     * Example usage:
+     *```kotlin
+     * val builder: PortalBuilder = PortalManager.newPortal("my_portal")
+     * val portal: Portal = builder.create()
+     * ```
+     *
+     * ```java
+     * PortalBuilder builder = PortalManager.newPortal("my_portal");
+     * Portal portal = builder.create();
+     * ```
+     *
+     * @param name the Portal name
+     * @return a [PortalBuilder] object that has a fluent API to construct a Portal
      */
     @JvmStatic
     fun newPortal(name: String): PortalBuilder {
@@ -76,6 +146,7 @@ object PortalManager {
 
     /**
      * Verifies the provided registration key string against the Portals public key.
+     *
      * @param key: The Portals registration key to validate
      * @return True if validation was successful, false if not.
      */
@@ -143,7 +214,8 @@ object PortalManager {
 
     /**
      * Check if there is a Portals registration issue.
-     * @return True if there is a Portals registration error
+     *
+     * @return true if there is a Portals registration error
      */
     internal fun isRegisteredError(): Boolean {
         return registeredError

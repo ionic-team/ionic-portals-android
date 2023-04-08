@@ -18,6 +18,20 @@ import org.json.JSONObject
 import java.io.File
 import kotlin.reflect.KVisibility
 
+/**
+ * An Android [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment) class
+ * containing an instance of a [Portal] to load in a web view supported by Capacitor.
+ *
+ * Example usage:
+ * ```kotlin
+ * val fragment: PortalFragment = PortalFragment(myPortal)
+ * ```
+ *
+ * ```java
+ * PortalFragment fragment = new PortalFragment(myPortal);
+ * ```
+ *
+ */
 open class PortalFragment : Fragment {
     val PORTAL_NAME = "PORTALNAME"
     var portal: Portal? = null
@@ -50,6 +64,9 @@ open class PortalFragment : Fragment {
         this.webVitalsCallback = webVitalsCallback
     }
 
+    /**
+     * Extends the Android Fragment `onCreateView` lifecycle event.
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,11 +76,21 @@ open class PortalFragment : Fragment {
         return inflater.inflate(layout, container, false)
     }
 
+    /**
+     * Extends the Android Fragment `onViewCreated` lifecycle event.
+     * At this point in the lifecycle the fragment will attempt to load the Portal content.
+     * This is when the fragment will load any provided config or plugins.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         load(savedInstanceState)
     }
 
+    /**
+     * Extends the Android Fragment 'onDestroy' lifecycle event.
+     * At this point in the lifecycle the fragment will attempt to clean up the [Bridge] and
+     * unsubscribe any attached Portals message subscriptions.
+     */
     override fun onDestroy() {
         super.onDestroy()
         if (bridge != null) {
@@ -75,6 +102,9 @@ open class PortalFragment : Fragment {
         }
     }
 
+    /**
+     * Extends the Android Fragment 'onResume' lifecycle event.
+     */
     override fun onResume() {
         super.onResume()
         bridge?.app?.fireStatusChange(true)
@@ -82,44 +112,111 @@ open class PortalFragment : Fragment {
         Logger.debug("App resumed")
     }
 
+    /**
+     * Extends the Android Fragment 'onPause' lifecycle event.
+     */
     override fun onPause() {
         super.onPause()
         bridge?.onPause()
         Logger.debug("App paused")
     }
 
+    /**
+     * Extends the Android Fragment 'onSaveInstanceState' event.
+     */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(PORTAL_NAME, portal?.name)
     }
 
+    /**
+     * Extends the Android Fragment 'onConfigurationChanged' event.
+     */
     override fun onConfigurationChanged(@NonNull newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         bridge?.onConfigurationChanged(newConfig)
     }
 
+    /**
+     * Add a Capacitor [Plugin] to be loaded with the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * portalFragment.addPlugin(MyPlugin::class.java)
+     * ```
+     *
+     * ```java
+     * portalFragment.addPlugin(MyPlugin.class);
+     * ```
+     *
+     * @param plugin a plugin to load with the Portal
+     */
     fun addPlugin(plugin: Class<out Plugin?>?) {
         initialPlugins.add(plugin!!)
     }
 
+    /**
+     * Add a Capacitor [Plugin] instance to be loaded with the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val myPlugin = MyCapacitorPlugin()
+     * portalFragment.addPluginInstance(myPlugin)
+     * ```
+     *
+     * ```java
+     * val myPlugin = new MyCapacitorPlugin();
+     * portalFragment.addPluginInstance(myPlugin);
+     * ```
+     *
+     * @param plugin a plugin instance to load with the Portal
+     */
     fun addPluginInstance(plugin: Plugin) {
         initialPluginInstances.add(plugin)
     }
 
+    /**
+     * Set a Capacitor [CapConfig] to be used to configure the instance of Capacitor used in the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val config = CapConfig.Builder(context).setLoggingEnabled(true).create()
+     * portalFragment.setConfig(config)
+     * ```
+     *
+     * ```java
+     * CapConfig config = new CapConfig.Builder(getContext()).setLoggingEnabled(true).create();
+     * portalFragment.setConfig(config);
+     * ```
+     *
+     * @param config the Capacitor config to use
+     */
     fun setConfig(config: CapConfig?) {
         this.config = config
     }
 
+    /**
+     * Get the Capacitor [Bridge] instance used in the Portal.
+     *
+     * @return the Capacitor Bridge supporting the web view content
+     */
     fun getBridge(): Bridge? {
         return bridge
     }
 
+    /**
+     * Adds a Capacitor [WebViewListener] to the Portal to trigger a callback on web view events.
+     *
+     * @param webViewListener a listener to trigger on web view events
+     */
     fun addWebViewListener(webViewListener: WebViewListener) {
         webViewListeners.add(webViewListener)
     }
 
     /**
      * Set an Initial Context that will be loaded in lieu of one set on the Portal object.
+     *
+     * @param initialContext the Initial Context information
      */
     fun setInitialContext(initialContext: Any) {
         this.initialContext = initialContext
@@ -127,11 +224,17 @@ open class PortalFragment : Fragment {
 
     /**
      * Get the Initial Context that will be loaded in lieu of one set on the Portal object, if set.
+     *
+     * @return the Initial Context information
      */
     fun getInitialContext(): Any? {
         return this.initialContext
     }
 
+    /**
+     * Reloads the Portal.
+     * If Live Updates is used and the web content was updated, the new content will be loaded.
+     */
     fun reload() {
         if(portal?.liveUpdateConfig != null) {
             val latestLiveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
@@ -246,6 +349,9 @@ open class PortalFragment : Fragment {
         }
     }
 
+    /**
+     * Sets up the supporting JavaScript code that Portals needs on the web view content.
+     */
     private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
 
@@ -331,6 +437,8 @@ open class PortalFragment : Fragment {
      * Alternatively the [PortalMethod] annotation topic property can be used to designate a
      * different name. The registered methods should accept a single String representing the payload
      * of a message sent through the Portal.
+     *
+     * @param messageReceiverParent a class that contains [PortalMethod] annotated functions
      */
     fun linkMessageReceivers(messageReceiverParent: Any) {
         val members = messageReceiverParent.javaClass.kotlin.members.filter { it.annotations.any { annotation -> annotation is PortalMethod } }

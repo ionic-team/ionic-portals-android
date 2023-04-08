@@ -3,22 +3,34 @@ package io.ionic.portals
 import android.webkit.JavascriptInterface
 
 /**
- * Web Vitals Support Class
+ * A class providing Web Vitals functionality. When Web Vitals metrics are desired, this class adds
+ * JavaScript to the Portals web view to support measuring the performance of the web application.
  *
  * @link https://web.dev/vitals/
+ * @property portalName the name of the Portal being analyzed
+ * @property callback a callback to act on reported Web Vitals data
  */
 class WebVitals(val portalName: String, val callback: (Metric, Long) -> Unit) {
-
     /**
      * Metrics supported by Portals Web Vitals.
-     * FCP = First Contentful Paint
-     * FID = First Input Delay
-     * TTFB = Time To First Byte
      *
      * @link https://web.dev/vitals/
      */
     enum class Metric {
-        FCP, FID, TTFB
+        /**
+         * [First Contentful Paint](https://web.dev/fcp/)
+         */
+        FCP,
+
+        /**
+         * [First Input Delay](https://web.dev/fid/)
+         */
+        FID,
+
+        /**
+         * [Time to First Byte](https://web.dev/ttfb/)
+         */
+        TTFB
     }
 
     /**
@@ -44,8 +56,8 @@ class WebVitals(val portalName: String, val callback: (Metric, Long) -> Unit) {
 
     /**
      * First Contentful Paint (FCP)
-     * @param time Time in milliseconds when FCP is measured
      * @link https://web.dev/fcp/
+     * @param time Time in milliseconds when FCP is measured
      */
     @JavascriptInterface
     fun fcp(time: Long) {
@@ -54,8 +66,8 @@ class WebVitals(val portalName: String, val callback: (Metric, Long) -> Unit) {
 
     /**
      * First Input Delay (FID)
-     * @param time Time in milliseconds when FID is measured
      * @link https://web.dev/fid/
+     * @param time Time in milliseconds when FID is measured
      */
     @JavascriptInterface
     fun fid(time: Long) {
@@ -64,12 +76,11 @@ class WebVitals(val portalName: String, val callback: (Metric, Long) -> Unit) {
 
     /**
      * Time To First Byte (TTFB)
-     * @param time Time in milliseconds when TTFB is measured
      * @link https://web.dev/ttfb/
+     * @param time Time in milliseconds when TTFB is measured
      */
     @JavascriptInterface
     fun ttfb(time: Long) {
         callback(Metric.TTFB, time)
     }
-
 }

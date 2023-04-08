@@ -4,33 +4,38 @@ import android.content.Context
 import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
-import java.util.*
-import kotlin.collections.LinkedHashMap
 
-class Portal(
+/**
+ * A class representing a Portal that contains information about the web content to load and any
+ * associated plugins used by the Portal. It is discouraged to use this class directly to create
+ * a Portal and instead use [PortalBuilder] or [PortalManager] to construct a new instance.
+ *
+ * Example usage:
+ * ```kotlin
+ * val name: String = "Hello World"
+ * val portal: Portal = Portal(name)
+ * ```
+ *
+ * ```java
+ * String name = "Hello World";
+ * Portal portal = new Portal(name);
+ * ```
+ *
+ * @property name the name of the Portal
+ */
+class Portal(val name: String) {
     /**
-     * Get the name of the Portal.
-     *
-     * @return The name of the Portal.
-     */
-    val name: String
-) {
-    /**
-     * Get the list of Capacitor [Plugin] registered with the Portal.
-     *
-     * @return The list of plugins registered with the Portal.
+     * Capacitor [Plugin] registered with the Portal.
      */
     internal val plugins = ArrayList<Class<out Plugin?>>()
 
     /**
-     * Get the list of Capacitor [Plugin] instances added to the Portal.
-     *
-     * @return The list of plugins registered with the Portal.
+     * Capacitor [Plugin] instances added to the Portal.
      */
     internal val pluginInstances = ArrayList<Plugin>()
 
     /**
-     * Get the list of Asset Maps registered with the Portal
+     * Asset Maps registered with the Portal.
      */
     internal var assetMaps = LinkedHashMap<String, AssetMap>()
 
@@ -42,32 +47,27 @@ class Portal(
     }
 
     /**
-     * The initial context to pass to the webview.
+     * The initial context to pass to the web view.
      *
-     * @return Either a JSON string or a Map
+     * @return a JSON string or a Map
      */
     var initialContext: Any? = null
         internal set
 
     /**
-     * The [PortalFragment] type used by a [PortalView] when using Portals directly in
-     * Android layouts/XML.
-     *
-     * @param portalFragmentType A PortalFragment to use if the Portal is added using a PortalView.
+     * The [PortalFragment] type used by a [PortalView] when using Portals directly in Android layouts/XML.
      */
     var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
 
     /**
      * The start directory of the portal web app. Portals will use the name of the Portal by default
      * if this value is not set.
-     *
-     * @param startDir The start directory of the Portal web app.
      */
     var startDir: String = ""
         get() = if (field.isEmpty()) name else field
 
     /**
-     * LiveUpdate config if live updates is being used.
+     * A LiveUpdate config, if live updates is being used.
      */
     var liveUpdateConfig: LiveUpdate? = null
 
@@ -79,7 +79,16 @@ class Portal(
     /**
      * Add a Capacitor [Plugin] to be loaded with this Portal.
      *
-     * @param plugin A Plugin to be used with the Portal.
+     * Example usage:
+     * ```kotlin
+     * portal.addPlugin(MyPlugin::class.java)
+     * ```
+     *
+     * ```java
+     * portal.addPlugin(MyPlugin.class);
+     * ```
+     *
+     * @param plugin a Plugin to be used with the Portal
      */
     fun addPlugin(plugin: Class<out Plugin?>) {
         if(plugin != PortalsPlugin::class.java) {
@@ -90,7 +99,28 @@ class Portal(
     /**
      * Add multiple Capacitor [Plugin] to be loaded with this Portal.
      *
-     * @param plugins A list of Plugins to be used with the Portal.
+     * Example usage:
+     * ```kotlin
+     * val list: List<Class<out Plugin?>> = listOf(
+     *     FooPlugin::class.java,
+     *     BarPlugin::class.java,
+     *     BazPlugin::class.java
+     * )
+     *
+     * portal.addPlugins(list)
+     * ```
+     *
+     * ```java
+     * List<Class<? extends Plugin>> list = Arrays.asList(
+     *     FooPlugin.class,
+     *     BarPlugin.class,
+     *     BazPlugin.class
+     * );
+     *
+     * portal.addPlugins(list);
+     * ```
+     *
+     * @param plugins a list of Plugins to be used with the Portal
      */
     fun addPlugins(plugins: List<Class<out Plugin?>>) {
         plugins.forEach {
@@ -101,7 +131,18 @@ class Portal(
     /**
      * Add a Capacitor [Plugin] instance to be loaded with this Portal.
      *
-     * @param plugin A Plugin instance to be used with the Portal.
+     * Example usage:
+     * ```kotlin
+     * val myPlugin = MyCapacitorPlugin()
+     * portal.addPluginInstance(myPlugin)
+     * ```
+     *
+     * ```java
+     * val myPlugin = new MyCapacitorPlugin();
+     * portal.addPluginInstance(myPlugin);
+     * ```
+     *
+     * @param plugin a Plugin instance to be used with the Portal
      */
     fun addPluginInstance(plugin: Plugin) {
         pluginInstances.add(plugin)
@@ -110,7 +151,29 @@ class Portal(
     /**
      * Add multiple Capacitor [Plugin] instances to be loaded with this Portal.
      *
-     * @param plugins A list of Plugin instances to be used with the Portal.
+     * Example usage:
+     * ```kotlin
+     * val list: List<Plugin> = listOf(
+     *     MyCapacitorPlugin(),
+     *     MySecondCapacitorPlugin(),
+     *     MyThirdCapacitorPlugin()
+     * )
+     *
+     * portal.addPluginInstances(list)
+     * ```
+     *
+     * ```java
+     * List<Plugin> list = Arrays.asList(
+     *     new MyCapacitorPlugin(),
+     *     new MySecondCapacitorPlugin(),
+     *     new MyThirdCapacitorPlugin()
+     * );
+     *
+     * portal.addPluginInstances(list);
+     * ```
+     *
+     *
+     * @param plugins a list of Plugin instances to be used with the Portal
      */
     fun addPluginInstances(plugins: List<Plugin>) {
         pluginInstances.addAll(plugins)
@@ -119,25 +182,68 @@ class Portal(
     /**
      * Add multiple [AssetMap] instances to be loaded with this Portal.
      *
-     * @param assetMaps A list of Plugin instances to be used with the Portal.
+     * Example usage:
+     * ```kotlin
+     * val assetMaps = LinkedHashMap<String, AssetMap>();
+     * assetMaps["images"] = AssetMap("images", "/shared/images", "images")
+     * portal.addAssetMaps(assetMaps)
+     * ```
+     *
+     * ```java
+     * LinkedHashMap<String, AssetMap> assetMaps = new LinkedHashMap<String, AssetMap>();
+     * assetMaps.put("images", new AssetMap("images","/shared/images","images"));
+     * portal.addAssetMaps(assetMaps);
+     * ```
+     *
+     * @param assetMaps a list of Plugin instances to be used with the Portal
      */
     fun addAssetMaps(assetMaps: LinkedHashMap<String, AssetMap>) {
         this.assetMaps.putAll(assetMaps)
     }
 
     /**
-     * Sets the initial context to pass to the webview
+     * Sets the initial context to pass to the web view.
      *
-     * @param initialContext A map containing key/pair values that will be converted to a JavaScript object in the webview.
+     * Example usage:
+     * ```kotlin
+     * val map: Map<String, Any> = mapOf(
+     *     "foo" to "bar",
+     *     "ionic" to "portals"
+     *     "num" to 42
+     * )
+     *
+     * portal.setInitialContext(map)
+     * ```
+     *
+     * ```java
+     * Map<String, Object> map = Map.ofEntries(
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("foo", "bar"),
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("ionic", "portals"),
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("num", 42)
+     * );
+     *
+     * portal.setInitialContext(map);
+     * ```
+     *
+     * @param initialContext A map containing key/pair values that will be converted to a JavaScript object in the web view
      */
     fun setInitialContext(initialContext: Map<String, Any>) {
         this.initialContext = initialContext
     }
 
     /**
-     * Sets the initial context to pass to the webview
+     * Sets the initial context to pass to the web view.
      *
-     * @param initialContext A JSON string that will be converted to a JavaScript object in the webview.
+     * Example usage:
+     * ```kotlin
+     * portal.setInitialContext("{\"foo\": \"bar\"}")
+     * ```
+     *
+     * ```java
+     * portal.setInitialContext("{\"foo\": \"bar\"}");
+     * ```
+     *
+     * @param initialContext a JSON string that will be converted to a JavaScript object in the web view
      */
     fun setInitialContext(initialContext: String) {
         this.initialContext = initialContext
@@ -145,6 +251,33 @@ class Portal(
 
 }
 
+/**
+ * A class used to create [Portal] instances.
+ * It follows a [Builder Pattern](https://en.wikipedia.org/wiki/Builder_pattern) and can be used in
+ * situations where you want to programmatically create a Portal at runtime instead of using one directly
+ * in an XML layout.
+ *
+ * Example usage:
+ * ```kotlin
+ * val portal: Portal = PortalBuilder("myPortal")
+ *     .addPlugin(MyCapacitorPlugin::class.java)
+ *     .setPortalFragmentType(MyFadeInOutPortalFragment::class.java)
+ *     .setInitialContext(mapOf("myVariableFromAndroid" to 42))
+ *     .setStartDir("web_app")
+ *     .create()
+ * ```
+ *
+ * ```java
+ * Portal portal = new PortalBuilder("myPortal")
+ *     .addPlugin(MyCapacitorPlugin.class)
+ *     .setPortalFragmentType(MyFadeInOutPortalFragment.class)
+ *     .setInitialContext(Map.of("myVariableFromAndroid", 42))
+ *     .setStartDir("web_app")
+ *     .create();
+ * ```
+ *
+ * @property name the name of the Portal
+ */
 class PortalBuilder(val name: String) {
     private var _startDir: String? = null
     private var plugins = mutableListOf<Class<out Plugin?>>()
@@ -159,46 +292,226 @@ class PortalBuilder(val name: String) {
         this.onCreate = onCreate;
     }
 
+    /**
+     * Set the directory of the Portal.
+     * This directory is the on device directory of where your web application is located.
+     *
+     * Example usage:
+     * ```kotlin
+     * builder = builder.setStartDir("/path/to/web/application/")
+     * ```
+     *
+     * ```java
+     * builder = builder.setStartDir("/path/to/web/application/");
+     * ```
+     *
+     * @param startDir the start directory the Portal should load
+     * @return the instance of the PortalBuilder with the start directory set
+     */
     fun setStartDir(startDir: String): PortalBuilder {
         this._startDir = startDir
         return this
     }
 
+    /**
+     * Add a plugin to be loaded with the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * builder = builder.addPlugin(MyPlugin::class.java)
+     * ```
+     *
+     * ```java
+     * builder = builder.addPlugin(MyPlugin.class);
+     * ```
+     *
+     * @param plugin the plugin class to add to the portal
+     * @return the instance of the PortalBuilder with the plugin added
+     */
     fun addPlugin(plugin: Class<out Plugin?>): PortalBuilder {
         plugins.add(plugin)
         return this
     }
 
+    /**
+     * Add a plugin instance to be loaded with the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val myPlugin = MyCapacitorPlugin()
+     * builder = builder.addPluginInstance(myPlugin)
+     * ```
+     *
+     * ```java
+     * val myPlugin = new MyCapacitorPlugin();
+     * builder = builder.addPluginInstance(myPlugin);
+     * ```
+     *
+     * @param plugin the plugin instance to add to the portal
+     * @return the instance of the PortalBuilder with the plugin instances added
+     */
     fun addPluginInstance(plugin: Plugin): PortalBuilder {
         pluginInstances.add(plugin)
         return this
     }
 
+    /**
+     * Add an Asset Map to the Portal used with shared assets.
+     *
+     * Example usage:
+     * ```kotlin
+     * builder = builder.addAssetMap(AssetMap("images","/shared/images","images"))
+     * ```
+     *
+     * ```java
+     * builder = builder.addAssetMap(new AssetMap("images","/shared/images","images"));
+     * ```
+     *
+     * @param assetMap the Asset Map to add
+     * @return the instance of the PortalBuilder with the Asset Map added
+     */
     fun addAssetMap(assetMap: AssetMap): PortalBuilder {
         assetMaps.put(assetMap.getAssetPath(), assetMap)
         return this
     }
 
+    /**
+     * Sets the initial context to pass to the web view.
+     * You can pass in either a [Map] or a [String] that will be parsed into a JSON object.
+     *
+     * Example usage with a [Map]:
+     * ```kotlin
+     * val map: Map<String, Any> = mapOf(
+     *     "foo" to "bar",
+     *     "ionic" to "portals"
+     *     "num" to 42
+     * )
+     *
+     * builder = builder.setInitialContext(map)
+     * ```
+     *
+     * ```java
+     * Map<String, Object> map = Map.ofEntries(
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("foo", "bar"),
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("ionic", "portals"),
+     *     new AbstractMap.SimpleEntry<String, @NotNull Object>("num", 42)
+     * );
+     *
+     * builder = builder.setInitialContext(map);
+     * ```
+     *
+     * Example usage with a [String]:
+     * ```kotlin
+     * builder = builder.setInitialContext("{\"foo\": \"bar\"}")
+     * ```
+     *
+     * ```java
+     * builder = builder.setInitialContext("{\"foo\": \"bar\"}");
+     * ```
+     *
+     * @param initialContext the initial context to add to the Portal
+     * @return the instance of the PortalBuilder with the initial context set
+     */
     fun setInitialContext(initialContext: Any): PortalBuilder {
         this.initialContext = initialContext
         return this
     }
 
+    /**
+     * Set a list of Capacitor [Plugin] to be loaded with the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val list: MutableList<Class<out Plugin?}>> = mutableListOf(
+     *     FooPlugin::class.java,
+     *     BarPlugin::class.java,
+     *     BazPlugin::class.java
+     * )
+     *
+     * builder = builder.setPlugins(list)
+     * ```
+     *
+     * ```java
+     * List<? extends Plugin> list = Array.asList(
+     *     FooPlugin.class,
+     *     BarPlugin.class,
+     *     BazPlugin.class
+     * );
+     *
+     * builder = builder.setPlugins(list);
+     * ```
+     *
+     * @param plugins a list of plugins to be used with the Portal
+     * @return the instance of the PortalBuilder with the plugins set
+     */
     fun setPlugins(plugins: MutableList<Class<out Plugin?>>): PortalBuilder {
         this.plugins = plugins
         return this
     }
 
+    /**
+     * Set a list of [AssetMap] to the Portal used with shared assets.
+     *
+     * Example usage:
+     * ```kotlin
+     * val assetMaps = LinkedHashMap<String, AssetMap>();
+     * assetMaps["images"] = AssetMap("images", "/shared/images", "images")
+     * builder = builder.setAssetMaps(assetMaps)
+     * ```
+     *
+     * ```java
+     * LinkedHashMap<String, AssetMap> assetMaps = new LinkedHashMap<String, AssetMap>();
+     * assetMaps.put("images", new AssetMap("images","/shared/images","images"));
+     * builder = builder.setAssetMaps(assetMaps);
+     * ```
+     *
+     * @param assetMaps
+     * @return the instance of the PortalBuilder with the asset maps set
+     */
     fun setAssetMaps(assetMaps: LinkedHashMap<String, AssetMap>): PortalBuilder {
         this.assetMaps = assetMaps
         return this
     }
 
+    /**
+     * Set the [PortalFragment] class used with displaying the Portal when added to an XML layout.
+     *
+     * Example usage:
+     * ```kotlin
+     * builder = builder.setPortalFragmentType(MyPortalFragment::class.java)
+     * ```
+     *
+     * ```java
+     * builder = builder.setPortalFragmentType(MyPortalFragment.class);
+     * ```
+     *
+     * @param portalFragmentType a class that extends [PortalFragment]
+     * @return the instance of the PortalBuilder with the fragment type set
+     */
     fun setPortalFragmentType(portalFragmentType: Class<out PortalFragment?>): PortalBuilder {
         this.portalFragmentType = portalFragmentType
         return this
     }
 
+    /**
+     * Set the [LiveUpdate] config if using the Live Updates SDK with Portals.
+     *
+     * Example usage:
+     * ```kotlin
+     * val liveUpdateConfig = LiveUpdate("appId", "production")
+     * builder = builder.setLiveUpdateConfig(liveUpdateConfig)
+     * ```
+     *
+     * ```java
+     * LiveUpdate liveUpdateConfig = new LiveUpdate("appId", "production");
+     * builder = builder.setLiveUpdateConfig(liveUpdateConfig);
+     * ```
+     *
+     * @param context the Android [Context] used with Live Update configuration
+     * @param liveUpdateConfig the Live Update config object
+     * @param updateOnAppLoad if a Live Update sync should occur as soon as the Portal loads
+     * @return the instance of the PortalBuilder with the Live Update config set
+     */
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
         this.liveUpdateConfig = liveUpdateConfig
@@ -211,6 +524,21 @@ class PortalBuilder(val name: String) {
         return this
     }
 
+    /**
+     * Creates the [Portal] instance from the current state of the [PortalBuilder] provided.
+     * This finishes building the Portal.
+     *
+     * Example usage:
+     * ```kotlin
+     * val portal: Portal = builder.create()
+     * ```
+     *
+     * ```java
+     * Portal portal = builder.create();
+     * ```
+     *
+     * @return a built Portal instance
+     */
     fun create(): Portal {
         val portal = Portal(name)
         portal.startDir = this._startDir ?: this.name

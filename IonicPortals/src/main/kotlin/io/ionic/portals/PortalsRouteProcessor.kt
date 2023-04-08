@@ -4,7 +4,20 @@ import android.content.Context
 import com.getcapacitor.ProcessedRoute
 import com.getcapacitor.RouteProcessor
 
+/**
+ * A class used by [PortalFragment] to provide instructions to the Capacitor router to load shared assets.
+ *
+ * @property context an Android [Context] used in the routing process
+ * @property assetMaps a set of [AssetMap] objects describing how to route to shared assets
+ */
 class PortalsRouteProcessor(val context: Context, val assetMaps: LinkedHashMap<String, AssetMap>): RouteProcessor {
+    /**
+     * A callback used by Capacitor to intercept routing logic to route to shared assets.
+     *
+     * @param basePath the base URL for the path
+     * @param path the remaining path string
+     * @return the [ProcessedRoute] to be used by Capacitor to route with
+     */
     override fun process(basePath: String?, path: String?): ProcessedRoute {
         val processedRoute = ProcessedRoute()
 
