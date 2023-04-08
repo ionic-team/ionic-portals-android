@@ -10,12 +10,13 @@ import io.ionic.liveupdates.LiveUpdateManager
  * associated plugins used by the Portal. It is discouraged to use this class directly to create
  * a Portal and instead use [PortalBuilder] or [PortalManager] to construct a new instance.
  *
- * Example usage:
+ * Example usage (kotlin):
  * ```kotlin
  * val name: String = "Hello World"
  * val portal: Portal = Portal(name)
  * ```
  *
+ * Example usage (java):
  * ```java
  * String name = "Hello World";
  * Portal portal = new Portal(name);
@@ -79,11 +80,12 @@ class Portal(val name: String) {
     /**
      * Add a Capacitor [Plugin] to be loaded with this Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * portal.addPlugin(MyPlugin::class.java)
      * ```
      *
+     * Example usage (java):
      * ```java
      * portal.addPlugin(MyPlugin.class);
      * ```
@@ -99,7 +101,7 @@ class Portal(val name: String) {
     /**
      * Add multiple Capacitor [Plugin] to be loaded with this Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val list: List<Class<out Plugin?>> = listOf(
      *     FooPlugin::class.java,
@@ -110,6 +112,7 @@ class Portal(val name: String) {
      * portal.addPlugins(list)
      * ```
      *
+     * Example usage (java):
      * ```java
      * List<Class<? extends Plugin>> list = Arrays.asList(
      *     FooPlugin.class,
@@ -131,12 +134,13 @@ class Portal(val name: String) {
     /**
      * Add a Capacitor [Plugin] instance to be loaded with this Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val myPlugin = MyCapacitorPlugin()
      * portal.addPluginInstance(myPlugin)
      * ```
      *
+     * Example usage (java):
      * ```java
      * val myPlugin = new MyCapacitorPlugin();
      * portal.addPluginInstance(myPlugin);
@@ -151,7 +155,7 @@ class Portal(val name: String) {
     /**
      * Add multiple Capacitor [Plugin] instances to be loaded with this Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val list: List<Plugin> = listOf(
      *     MyCapacitorPlugin(),
@@ -162,6 +166,7 @@ class Portal(val name: String) {
      * portal.addPluginInstances(list)
      * ```
      *
+     * Example usage (java):
      * ```java
      * List<Plugin> list = Arrays.asList(
      *     new MyCapacitorPlugin(),
@@ -182,13 +187,14 @@ class Portal(val name: String) {
     /**
      * Add multiple [AssetMap] instances to be loaded with this Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val assetMaps = LinkedHashMap<String, AssetMap>();
      * assetMaps["images"] = AssetMap("images", "/shared/images", "images")
      * portal.addAssetMaps(assetMaps)
      * ```
      *
+     * Example usage (java):
      * ```java
      * LinkedHashMap<String, AssetMap> assetMaps = new LinkedHashMap<String, AssetMap>();
      * assetMaps.put("images", new AssetMap("images","/shared/images","images"));
@@ -204,7 +210,7 @@ class Portal(val name: String) {
     /**
      * Sets the initial context to pass to the web view.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val map: Map<String, Any> = mapOf(
      *     "foo" to "bar",
@@ -215,6 +221,7 @@ class Portal(val name: String) {
      * portal.setInitialContext(map)
      * ```
      *
+     * Example usage (java):
      * ```java
      * Map<String, Object> map = Map.ofEntries(
      *     new AbstractMap.SimpleEntry<String, @NotNull Object>("foo", "bar"),
@@ -234,11 +241,12 @@ class Portal(val name: String) {
     /**
      * Sets the initial context to pass to the web view.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * portal.setInitialContext("{\"foo\": \"bar\"}")
      * ```
      *
+     * Example usage (java):
      * ```java
      * portal.setInitialContext("{\"foo\": \"bar\"}");
      * ```
@@ -257,7 +265,7 @@ class Portal(val name: String) {
  * situations where you want to programmatically create a Portal at runtime instead of using one directly
  * in an XML layout.
  *
- * Example usage:
+ * Example usage (kotlin):
  * ```kotlin
  * val portal: Portal = PortalBuilder("myPortal")
  *     .addPlugin(MyCapacitorPlugin::class.java)
@@ -267,6 +275,7 @@ class Portal(val name: String) {
  *     .create()
  * ```
  *
+ * Example usage (java):
  * ```java
  * Portal portal = new PortalBuilder("myPortal")
  *     .addPlugin(MyCapacitorPlugin.class)
@@ -296,11 +305,12 @@ class PortalBuilder(val name: String) {
      * Set the directory of the Portal.
      * This directory is the on device directory of where your web application is located.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * builder = builder.setStartDir("/path/to/web/application/")
      * ```
      *
+     * Example usage (java):
      * ```java
      * builder = builder.setStartDir("/path/to/web/application/");
      * ```
@@ -316,11 +326,12 @@ class PortalBuilder(val name: String) {
     /**
      * Add a plugin to be loaded with the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * builder = builder.addPlugin(MyPlugin::class.java)
      * ```
      *
+     * Example usage (java):
      * ```java
      * builder = builder.addPlugin(MyPlugin.class);
      * ```
@@ -336,12 +347,13 @@ class PortalBuilder(val name: String) {
     /**
      * Add a plugin instance to be loaded with the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val myPlugin = MyCapacitorPlugin()
      * builder = builder.addPluginInstance(myPlugin)
      * ```
      *
+     * Example usage (java):
      * ```java
      * val myPlugin = new MyCapacitorPlugin();
      * builder = builder.addPluginInstance(myPlugin);
@@ -358,11 +370,12 @@ class PortalBuilder(val name: String) {
     /**
      * Add an Asset Map to the Portal used with shared assets.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * builder = builder.addAssetMap(AssetMap("images","/shared/images","images"))
      * ```
      *
+     * Example usage (java):
      * ```java
      * builder = builder.addAssetMap(new AssetMap("images","/shared/images","images"));
      * ```
@@ -379,7 +392,7 @@ class PortalBuilder(val name: String) {
      * Sets the initial context to pass to the web view.
      * You can pass in either a [Map] or a [String] that will be parsed into a JSON object.
      *
-     * Example usage with a [Map]:
+     * Example usage with a [Map] (kotlin):
      * ```kotlin
      * val map: Map<String, Any> = mapOf(
      *     "foo" to "bar",
@@ -390,6 +403,12 @@ class PortalBuilder(val name: String) {
      * builder = builder.setInitialContext(map)
      * ```
      *
+     * Example usage with a [String] (kotlin):
+     * ```kotlin
+     * builder = builder.setInitialContext("{\"foo\": \"bar\"}")
+     * ```
+     *
+     * Example usage with a [Map] (java):
      * ```java
      * Map<String, Object> map = Map.ofEntries(
      *     new AbstractMap.SimpleEntry<String, @NotNull Object>("foo", "bar"),
@@ -400,11 +419,7 @@ class PortalBuilder(val name: String) {
      * builder = builder.setInitialContext(map);
      * ```
      *
-     * Example usage with a [String]:
-     * ```kotlin
-     * builder = builder.setInitialContext("{\"foo\": \"bar\"}")
-     * ```
-     *
+     * Example usage with a [String] (java):
      * ```java
      * builder = builder.setInitialContext("{\"foo\": \"bar\"}");
      * ```
@@ -420,7 +435,7 @@ class PortalBuilder(val name: String) {
     /**
      * Set a list of Capacitor [Plugin] to be loaded with the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val list: MutableList<Class<out Plugin?}>> = mutableListOf(
      *     FooPlugin::class.java,
@@ -431,6 +446,7 @@ class PortalBuilder(val name: String) {
      * builder = builder.setPlugins(list)
      * ```
      *
+     * Example usage (java):
      * ```java
      * List<? extends Plugin> list = Array.asList(
      *     FooPlugin.class,
@@ -452,13 +468,14 @@ class PortalBuilder(val name: String) {
     /**
      * Set a list of [AssetMap] to the Portal used with shared assets.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val assetMaps = LinkedHashMap<String, AssetMap>();
      * assetMaps["images"] = AssetMap("images", "/shared/images", "images")
      * builder = builder.setAssetMaps(assetMaps)
      * ```
      *
+     * Example usage (java):
      * ```java
      * LinkedHashMap<String, AssetMap> assetMaps = new LinkedHashMap<String, AssetMap>();
      * assetMaps.put("images", new AssetMap("images","/shared/images","images"));
@@ -476,11 +493,12 @@ class PortalBuilder(val name: String) {
     /**
      * Set the [PortalFragment] class used with displaying the Portal when added to an XML layout.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * builder = builder.setPortalFragmentType(MyPortalFragment::class.java)
      * ```
      *
+     * Example usage (java):
      * ```java
      * builder = builder.setPortalFragmentType(MyPortalFragment.class);
      * ```
@@ -496,12 +514,13 @@ class PortalBuilder(val name: String) {
     /**
      * Set the [LiveUpdate] config if using the Live Updates SDK with Portals.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val liveUpdateConfig = LiveUpdate("appId", "production")
      * builder = builder.setLiveUpdateConfig(liveUpdateConfig)
      * ```
      *
+     * Example usage (java):
      * ```java
      * LiveUpdate liveUpdateConfig = new LiveUpdate("appId", "production");
      * builder = builder.setLiveUpdateConfig(liveUpdateConfig);
@@ -528,11 +547,12 @@ class PortalBuilder(val name: String) {
      * Creates the [Portal] instance from the current state of the [PortalBuilder] provided.
      * This finishes building the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val portal: Portal = builder.create()
      * ```
      *
+     * Example usage (java):
      * ```java
      * Portal portal = builder.create();
      * ```

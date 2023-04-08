@@ -11,7 +11,7 @@ import java.security.spec.X509EncodedKeySpec
  * A class used to create and manage [Portal] instances. It follows a [Singleton Pattern](https://en.wikipedia.org/wiki/Singleton_pattern)
  * to allow access to any [Portal](./portal) from anywhere in the application.
  *
- * Example usage:
+ * Example usage (kotlin):
  * ```kotlin
  * PortalManager.newPortal("my_portal")
  *     .addPlugin(MyCapacitorPlugin::class.java)
@@ -21,6 +21,7 @@ import java.security.spec.X509EncodedKeySpec
  *     .create()
  * ```
  *
+ * Example usage (java):
  * ```java
  * PortalManager.newPortal("my_portal")
  *     .addPlugin(MyCapacitorPlugin.class)
@@ -53,11 +54,12 @@ object PortalManager {
     /**
      * Returns a [Portal] object given the name of the portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val portal: Portal = PortalManager.getPortal("my_portal")
      * ```
      *
+     * Example usage (java):
      * ```java
      * Portal portal = PortalManager.getPortal("my_portal");
      * ```
@@ -76,11 +78,12 @@ object PortalManager {
     /**
      * Get the number of Portals managed by the Portal Manager.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val portalCount: Int = PortalManager.size()
      * ```
      *
+     * Example usage (java):
      * ```java
      * int portalCount = PortalManager.size();
      * ```
@@ -95,11 +98,12 @@ object PortalManager {
      * Validate this copy of Portals with an API key. This function works offline and only needs to
      * be run once before creating your first [Portal].
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * PortalManager.register("YOUR_PORTALS_KEY")
      * ```
      *
+     * Example usage (java):
      * ```java
      * PortalManager.register("YOUR_PORTALS_KEY");
      * ```
@@ -123,12 +127,13 @@ object PortalManager {
      * A helper function to build portal classes and add them to the manager.
      * Classes built with newPortal are added to the PortalManager automatically.
      *
-     * Example usage:
+     * Example usage (kotlin):
      *```kotlin
      * val builder: PortalBuilder = PortalManager.newPortal("my_portal")
      * val portal: Portal = builder.create()
      * ```
      *
+     * Example usage (java):
      * ```java
      * PortalBuilder builder = PortalManager.newPortal("my_portal");
      * Portal portal = builder.create();

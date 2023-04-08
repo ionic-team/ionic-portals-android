@@ -22,11 +22,12 @@ import kotlin.reflect.KVisibility
  * An Android [Fragment](https://developer.android.com/reference/androidx/fragment/app/Fragment) class
  * containing an instance of a [Portal] to load in a web view supported by Capacitor.
  *
- * Example usage:
+ * Example usage (kotlin):
  * ```kotlin
  * val fragment: PortalFragment = PortalFragment(myPortal)
  * ```
  *
+ * Example usage (java):
  * ```java
  * PortalFragment fragment = new PortalFragment(myPortal);
  * ```
@@ -140,11 +141,12 @@ open class PortalFragment : Fragment {
     /**
      * Add a Capacitor [Plugin] to be loaded with the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * portalFragment.addPlugin(MyPlugin::class.java)
      * ```
      *
+     * Example usage (java):
      * ```java
      * portalFragment.addPlugin(MyPlugin.class);
      * ```
@@ -158,12 +160,13 @@ open class PortalFragment : Fragment {
     /**
      * Add a Capacitor [Plugin] instance to be loaded with the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val myPlugin = MyCapacitorPlugin()
      * portalFragment.addPluginInstance(myPlugin)
      * ```
      *
+     * Example usage (java):
      * ```java
      * val myPlugin = new MyCapacitorPlugin();
      * portalFragment.addPluginInstance(myPlugin);
@@ -178,12 +181,13 @@ open class PortalFragment : Fragment {
     /**
      * Set a Capacitor [CapConfig] to be used to configure the instance of Capacitor used in the Portal.
      *
-     * Example usage:
+     * Example usage (kotlin):
      * ```kotlin
      * val config = CapConfig.Builder(context).setLoggingEnabled(true).create()
      * portalFragment.setConfig(config)
      * ```
      *
+     * Example usage (java):
      * ```java
      * CapConfig config = new CapConfig.Builder(getContext()).setLoggingEnabled(true).create();
      * portalFragment.setConfig(config);
