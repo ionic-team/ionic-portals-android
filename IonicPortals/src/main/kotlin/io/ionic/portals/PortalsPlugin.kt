@@ -5,14 +5,32 @@ import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONException
 import org.json.JSONObject
 
+/**
+ * A special Capacitor Plugin within the Portals library that allows for bi-directional communication
+ * between Android and web code. It is loaded with every Portal automatically and does not need to be
+ * added like other plugins.
+ */
 @CapacitorPlugin(name = "Portals")
 class PortalsPlugin : Plugin() {
-
     companion object {
+        /**
+         * The subscriptions registered with the plugin.
+         */
         @JvmStatic
         var subscriptions = mutableMapOf<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
+
+        /**
+         * A reference ID for the subscription.
+         */
         @JvmStatic
         var subscriptionRef = 0
+
+        /**
+         * Publish a message to registered native callbacks.
+         *
+         * @param topic the topic name for the message
+         * @param data the message data
+         */
         @JvmStatic
         fun publish(topic: String, data: Any?) {
             subscriptions[topic]?.let {
@@ -23,6 +41,13 @@ class PortalsPlugin : Plugin() {
             }
         }
 
+        /**
+         * Subscribe to a topic.
+         *
+         * @param topic the name of the topic to subscribe to
+         * @param callback the callback to trigger when the subscription is called
+         * @return the reference ID of the subscription
+         */
         @JvmStatic
         fun subscribe(topic: String, callback: (result: SubscriptionResult) -> Unit): Int {
             subscriptionRef++
@@ -35,12 +60,20 @@ class PortalsPlugin : Plugin() {
             return subscriptionRef
         }
 
+        /**
+         *
+         */
         @JvmStatic
         fun unsubscribe(topic: String, subscriptionRef: Int) {
             subscriptions[topic]?.remove(subscriptionRef)
         }
     }
 
+    /**
+     * Publishes a message from the web app to the native app.
+     *
+     * @param call the [PluginCall] from web to native
+     */
     @PluginMethod(returnType = PluginMethod.RETURN_PROMISE)
     fun publishNative(call: PluginCall) {
         val topic = call.getString("topic") ?: run {
@@ -58,6 +91,11 @@ class PortalsPlugin : Plugin() {
         call.resolve()
     }
 
+    /**
+     * Allows the web to subscribe to messages from native.
+     *
+     * @param call the [PluginCall] from web to native
+     */
     @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
     fun subscribeNative(call: PluginCall) {
         val topic = call .getString("topic") ?: run {
@@ -74,6 +112,11 @@ class PortalsPlugin : Plugin() {
         call.resolve(result)
     }
 
+    /**
+     * Allows the web to unsubscribe from receiving messages from native.
+     *
+     * @param call the [PluginCall] from web to native
+     */
     @PluginMethod(returnType = PluginMethod.RETURN_PROMISE)
     fun unsubscribeNative(call: PluginCall) {
         val topic = call .getString("topic") ?: run {
@@ -89,6 +132,11 @@ class PortalsPlugin : Plugin() {
     }
 }
 
+/**
+ * An extension function to convert a JSONObject to a map.
+ *
+ * @return a map representation of the JSONObject
+ */
 fun JSONObject.toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>();
     this.keys().forEach {
@@ -97,7 +145,19 @@ fun JSONObject.toMap(): Map<String, Any> {
     return map
 }
 
+/**
+ * A class used for messages passed to subscriptions.
+ *
+ * @property topic the subscription topic
+ * @property data the message data
+ * @property subscriptionRef the subscription reference ID
+ */
 data class SubscriptionResult(val topic: String, val data: Any?, val subscriptionRef: Int) {
+    /**
+     * Serializes the SubscriptionResult to a JSObject.
+     *
+     * @return a JSObject representing the SubscriptionResult
+     */
     fun toJSObject(): JSObject {
         val jsObject = JSObject()
         jsObject.put("topic", this.topic)
