@@ -96,7 +96,6 @@ data class SubscriptionResult(val topic: String, val data: Any?, val subscriptio
         val jsObject = JSObject()
         jsObject.put("topic", this.topic)
         jsObject.put("data", this.data)
-        jsObject.put("subscriptionRef", this.subscriptionRef)
         return jsObject
     }
 }
