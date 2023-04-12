@@ -10,11 +10,11 @@ if (System.getenv("PORTALS_PUBLISH") == "true") {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 22
-        targetSdk = 32
+        targetSdk = 33
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:4.7.3")
+    api("com.capacitorjs:core:5.0.0-alpha.2")
     compileOnly("io.ionic:liveupdates:0.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.3")
