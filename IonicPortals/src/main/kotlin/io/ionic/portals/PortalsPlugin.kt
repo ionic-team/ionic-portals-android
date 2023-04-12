@@ -70,7 +70,7 @@ class PortalsPubSub {
  * added like other plugins if the default behavior is desired.
  *
  * If events should be scoped to a specific Portal or group of Portals, this should be initialized
- * with an instance of [PortalsPubSub] and added to [Portal.pluginInstances] via
+ * with an instance of [PortalsPubSub] and added to a Portal via [Portal.addPluginInstance] or
  * [PortalBuilder.addPluginInstance].
  */
 @CapacitorPlugin(name = "Portals")
