@@ -443,7 +443,11 @@ open class PortalFragment : Fragment {
      * different name. The registered methods should accept a single String representing the payload
      * of a message sent through the Portal.
      *
+     * An instance of [PortalsPubSub] can be provided to override the default behavior of publishing
+     * events through [PortalsPubSub.shared].
+     *
      * @param messageReceiverParent a class that contains [PortalMethod] annotated functions
+     * @param pubSub an instance of [PortalsPubSub]. Defaults to [PortalsPubSub.shared].
      */
     @JvmOverloads
     fun linkMessageReceivers(messageReceiverParent: Any, pubSub: PortalsPubSub = PortalsPubSub.shared) {
