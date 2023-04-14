@@ -126,7 +126,7 @@ class Portal(val name: String) {
      * @param plugins a list of Plugins to be used with the Portal
      */
     fun addPlugins(plugins: List<Class<out Plugin?>>) {
-        plugins.forEach {
+        plugins.iterator().forEach {
             this.addPlugin(it)
         }
     }

@@ -3,11 +3,11 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 plugins {
-    id("org.jetbrains.dokka") version "1.7.20"
+    id("org.jetbrains.dokka") version "1.8.10"
 }
 
 buildscript {
-    val kotlinVersion = "1.6.21"
+    val kotlinVersion = "1.8.20"
     extra.apply {
         set("kotlinVersion", kotlinVersion)
     }
@@ -25,7 +25,7 @@ buildscript {
             classpath("io.github.gradle-nexus:publish-plugin:1.1.0")
         }
 
-        classpath("org.jetbrains.dokka:dokka-base:1.7.20")
+        classpath("org.jetbrains.dokka:dokka-base:1.8.10")
         classpath("com.android.tools.build:gradle:7.2.2")
         classpath(kotlin("gradle-plugin", version = kotlinVersion))
         classpath(kotlin("serialization", version = kotlinVersion))
