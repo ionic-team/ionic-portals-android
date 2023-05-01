@@ -47,6 +47,7 @@ open class PortalFragment : Fragment {
     private var config: CapConfig? = null
     private val webViewListeners: MutableList<WebViewListener> = ArrayList()
     private var subscriptions = mutableMapOf<String, Int>()
+    private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
 
     constructor()
@@ -99,7 +100,7 @@ open class PortalFragment : Fragment {
             bridge?.onDetachedFromWindow()
         }
         for ((topic, ref) in subscriptions) {
-            PortalsPlugin.unsubscribe(topic, ref)
+            pubSub.unsubscribe(topic, ref)
         }
     }
 
@@ -442,9 +443,15 @@ open class PortalFragment : Fragment {
      * different name. The registered methods should accept a single String representing the payload
      * of a message sent through the Portal.
      *
+     * An instance of [PortalsPubSub] can be provided to override the default behavior of publishing
+     * events through [PortalsPubSub.shared].
+     *
      * @param messageReceiverParent a class that contains [PortalMethod] annotated functions
+     * @param pubSub an instance of [PortalsPubSub]. Defaults to [PortalsPubSub.shared].
      */
-    fun linkMessageReceivers(messageReceiverParent: Any) {
+    @JvmOverloads
+    fun linkMessageReceivers(messageReceiverParent: Any, pubSub: PortalsPubSub = PortalsPubSub.shared) {
+        this.pubSub = pubSub
         val members = messageReceiverParent.javaClass.kotlin.members.filter { it.annotations.any { annotation -> annotation is PortalMethod } }
 
         for (member in members) {
@@ -461,13 +468,13 @@ open class PortalFragment : Fragment {
 
             when (member.parameters.size) {
                 1 -> {
-                    val ref = PortalsPlugin.subscribe(methodName) { result ->
+                    val ref = pubSub.subscribe(methodName) { result ->
                         member.call(messageReceiverParent)
                     }
                     subscriptions[methodName] = ref
                 }
                 2 -> {
-                    val ref = PortalsPlugin.subscribe(methodName) { result ->
+                    val ref = pubSub.subscribe(methodName) { result ->
                         member.call(messageReceiverParent, result.data)
                     }
                     subscriptions[methodName] = ref

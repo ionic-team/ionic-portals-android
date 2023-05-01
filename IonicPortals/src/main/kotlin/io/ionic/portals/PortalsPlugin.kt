@@ -1,73 +1,81 @@
 package io.ionic.portals
 
+import android.util.Log
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
+
+class PortalsPubSub {
+    private var subscriptions = ConcurrentHashMap<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
+    private var subscriptionRef = AtomicInteger(0)
+
+    /**
+     * Publish a message to registered native callbacks.
+     *
+     * @param topic the topic name for the message
+     * @param data the message data
+     */
+    fun publish(topic: String, data: Any?) {
+        subscriptions[topic]?.let {
+            for ((ref, listener) in it) {
+                val result = SubscriptionResult(topic, data, ref)
+                listener(result)
+            }
+        }
+    }
+
+    /**
+     * Subscribe to a topic.
+     *
+     * @param topic the name of the topic to subscribe to
+     * @param callback the callback to trigger when the subscription is called
+     * @return the reference ID of the subscription
+     */
+    fun subscribe(topic: String, callback: (result: SubscriptionResult) -> Unit): Int {
+        val ref = subscriptionRef.incrementAndGet()
+        subscriptions[topic]?.let { subscription ->
+            subscription[ref] = callback
+        } ?: run {
+            val subscription = mutableMapOf(ref to callback)
+            subscriptions[topic] = subscription
+        }
+        return ref
+    }
+
+    /**
+     * Unsubscribes from a topic
+     *
+     * @param topic the name of the topic to unsubscribe from
+     * @param subscriptionRef the subscription reference returned from [subscribe]
+     */
+    fun unsubscribe(topic: String, subscriptionRef: Int) {
+        subscriptions[topic]?.remove(subscriptionRef)
+    }
+
+    companion object {
+        /**
+         * The default shared [PortalsPubSub] instance.
+         */
+        @JvmStatic
+        val shared = PortalsPubSub()
+    }
+}
 
 /**
  * A special Capacitor Plugin within the Portals library that allows for bi-directional communication
  * between Android and web code. It is loaded with every Portal automatically and does not need to be
- * added like other plugins.
+ * added like other plugins if the default behavior is desired.
+ *
+ * If events should be scoped to a specific Portal or group of Portals, this should be initialized
+ * with an instance of [PortalsPubSub] and added to a Portal via [Portal.addPluginInstance] or
+ * [PortalBuilder.addPluginInstance].
  */
 @CapacitorPlugin(name = "Portals")
-class PortalsPlugin : Plugin() {
-    companion object {
-        /**
-         * The subscriptions registered with the plugin.
-         */
-        @JvmStatic
-        var subscriptions = mutableMapOf<String, MutableMap<Int, (data: SubscriptionResult) -> Unit>>()
-
-        /**
-         * A reference ID for the subscription.
-         */
-        @JvmStatic
-        var subscriptionRef = 0
-
-        /**
-         * Publish a message to registered native callbacks.
-         *
-         * @param topic the topic name for the message
-         * @param data the message data
-         */
-        @JvmStatic
-        fun publish(topic: String, data: Any?) {
-            subscriptions[topic]?.let {
-                for ((ref, listener) in it) {
-                    val result = SubscriptionResult(topic, data, ref)
-                    listener(result)
-                }
-            }
-        }
-
-        /**
-         * Subscribe to a topic.
-         *
-         * @param topic the name of the topic to subscribe to
-         * @param callback the callback to trigger when the subscription is called
-         * @return the reference ID of the subscription
-         */
-        @JvmStatic
-        fun subscribe(topic: String, callback: (result: SubscriptionResult) -> Unit): Int {
-            subscriptionRef++
-            subscriptions[topic]?.let { subscription ->
-                subscription[subscriptionRef] = callback
-            } ?: run {
-                val subscription = mutableMapOf(subscriptionRef to callback)
-                subscriptions[topic] = subscription
-            }
-            return subscriptionRef
-        }
-
-        /**
-         *
-         */
-        @JvmStatic
-        fun unsubscribe(topic: String, subscriptionRef: Int) {
-            subscriptions[topic]?.remove(subscriptionRef)
-        }
-    }
+class PortalsPlugin(private val pubSub: PortalsPubSub = PortalsPubSub.shared) : Plugin() {
+    private val subscriptionRefs = ConcurrentHashMap<String, Int>()
 
     /**
      * Publishes a message from the web app to the native app.
@@ -87,7 +95,7 @@ class PortalsPlugin : Plugin() {
             null
         }
 
-        PortalsPlugin.publish(topic, data)
+        pubSub.publish(topic, data)
         call.resolve()
     }
 
@@ -96,39 +104,23 @@ class PortalsPlugin : Plugin() {
      *
      * @param call the [PluginCall] from web to native
      */
-    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
-    fun subscribeNative(call: PluginCall) {
-        val topic = call .getString("topic") ?: run {
-            call.reject("topic not provided")
-            return
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    override fun addListener(call: PluginCall?) {
+        super.addListener(call)
+        val topic = call?.getString("eventName") ?: return
+        if (subscriptionRefs[topic] != null)  { return }
+        val ref = pubSub.subscribe(topic) { result ->
+            notifyListeners(topic, result.toJSObject())
         }
-        call.setKeepAlive(true)
-        val ref = PortalsPlugin.subscribe(topic) { result ->
-            call.resolve(result.toJSObject())
-        }
-        val result = JSObject()
-        result.put("topic", topic)
-        result.put("subscriptionRef", ref)
-        call.resolve(result)
+
+        subscriptionRefs[topic] = ref
     }
 
-    /**
-     * Allows the web to unsubscribe from receiving messages from native.
-     *
-     * @param call the [PluginCall] from web to native
-     */
-    @PluginMethod(returnType = PluginMethod.RETURN_PROMISE)
-    fun unsubscribeNative(call: PluginCall) {
-        val topic = call .getString("topic") ?: run {
-            call.reject("topic not provided")
-            return
+    override fun handleOnDestroy() {
+        super.handleOnDestroy()
+        for ((key, ref) in subscriptionRefs) {
+            pubSub.unsubscribe(key, ref)
         }
-        val subscriptionRef = call .getInt("subscriptionRef") ?: run {
-            call.reject("subscriptionRef not provided")
-            return
-        }
-        PortalsPlugin.unsubscribe(topic, subscriptionRef)
-        call.resolve()
     }
 }
 
@@ -162,7 +154,6 @@ data class SubscriptionResult(val topic: String, val data: Any?, val subscriptio
         val jsObject = JSObject()
         jsObject.put("topic", this.topic)
         jsObject.put("data", this.data)
-        jsObject.put("subscriptionRef", this.subscriptionRef)
         return jsObject
     }
 }
