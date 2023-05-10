@@ -42,8 +42,7 @@ android {
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:5.0.1.1-beta.1")
-    implementation("org.apache.cordova:framework:10.1.1")
+    api("com.capacitorjs:core:5.0.3")
     implementation("androidx.core:core-ktx:1.10.0")
     compileOnly("io.ionic:liveupdates:0.4.0")
 
