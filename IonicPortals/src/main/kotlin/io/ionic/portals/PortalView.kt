@@ -185,7 +185,7 @@ class PortalView : FrameLayout {
 
             portalFragment?.portal = portal
             portalFragment?.onBridgeAvailable = this.onBridgeAvailable
-            portalFragment?.webVitalsCallback = this.webVitalsCallback
+//            portalFragment?.webVitalsCallback = this.webVitalsCallback
             attrs?.let { attributeSet ->
                 portalFragment?.onInflate(context, attributeSet, null)
             }
