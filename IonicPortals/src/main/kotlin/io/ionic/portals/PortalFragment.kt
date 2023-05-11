@@ -1,5 +1,6 @@
 package io.ionic.portals
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
@@ -7,9 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import com.getcapacitor.*
@@ -352,6 +350,7 @@ open class PortalFragment : Fragment {
     /**
      * Sets up the supporting JavaScript code that Portals needs on the web view content.
      */
+    @SuppressLint("JavascriptInterface")
     private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
 
