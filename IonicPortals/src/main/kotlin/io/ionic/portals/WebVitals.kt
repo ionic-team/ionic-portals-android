@@ -56,9 +56,10 @@ class WebVitals(val callback: (String, Metric, Long) -> Unit): Plugin() {
      * Original script contains:
      * ```
      * import { onFCP, onTTFB, onFID } from "web-vitals";
-     * onFCP(report => WebVitals.fcp(AndroidInitialContext.initialContext().name, report.value));
-     * onTTFB(report => WebVitals.ttfb(AndroidInitialContext.initialContext().name, report.value));
-     * onFID(report => WebVitals.fid(AndroidInitialContext.initialContext().name, report.value));
+     * const portalName = JSON.parse(AndroidInitialContext.initialContext()).name;
+     * onFCP(report => WebVitals.fcp(portalName, report.value));
+     * onTTFB(report => WebVitals.ttfb(portalName, report.value));
+     * onFID(report => WebVitals.fid(portalName, report.value));
      * ```
      *
      * Build command:

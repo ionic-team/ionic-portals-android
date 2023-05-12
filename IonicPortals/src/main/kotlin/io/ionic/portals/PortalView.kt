@@ -57,7 +57,6 @@ class PortalView : FrameLayout {
     private var mTransitioningFragmentViews: ArrayList<View>? = null
     private var mDrawDisappearingViewsFirst = true
     private var portalFragment: PortalFragment? = null
-    private var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
     private var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
 
     /**
@@ -76,13 +75,10 @@ class PortalView : FrameLayout {
     var tag: String? = null
 
     constructor(context: Context) : super(context)
-    constructor(context: Context, portalId: String) : this(context, portalId, portalId+"_view", null, null)
-    constructor(context: Context, portalId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)) : this(context, portalId, portalId+"_view", onBridgeAvailable, null)
-    constructor(context: Context, portalId: String, webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", null, webVitalsCallback)
-    constructor(context: Context, portalId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit), webVitalsCallback: (metric: WebVitals.Metric, time: Long) -> Unit) : this(context, portalId, portalId+"_view", onBridgeAvailable, webVitalsCallback)
+    constructor(context: Context, portalId: String) : this(context, portalId, portalId+"_view", null)
+    constructor(context: Context, portalId: String, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(context, portalId, portalId+"_view", onBridgeAvailable)
 
-    constructor(context: Context, portalId: String, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((metric: WebVitals.Metric, long: Long) -> Unit)?) : super(context) {
-        this.webVitalsCallback = webVitalsCallback
+    constructor(context: Context, portalId: String, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super(context) {
         this.onBridgeAvailable = onBridgeAvailable
         this.portalId = portalId
         this.viewId = viewId
@@ -100,16 +96,6 @@ class PortalView : FrameLayout {
         attrs,
         defStyleAttr
     ) {
-        readAttributes(context, attrs)
-        loadPortal(context, attrs)
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, webVitalsCallback: (metric: WebVitals.Metric, long: Long) -> Unit) : super(
-        context,
-        attrs,
-        defStyleAttr
-    ) {
-        this.webVitalsCallback = webVitalsCallback
         readAttributes(context, attrs)
         loadPortal(context, attrs)
     }
@@ -185,7 +171,6 @@ class PortalView : FrameLayout {
 
             portalFragment?.portal = portal
             portalFragment?.onBridgeAvailable = this.onBridgeAvailable
-//            portalFragment?.webVitalsCallback = this.webVitalsCallback
             attrs?.let { attributeSet ->
                 portalFragment?.onInflate(context, attributeSet, null)
             }
