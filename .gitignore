@@ -81,3 +81,7 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+
+# Web
+node_modules/
+vitals/dist

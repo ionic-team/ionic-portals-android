@@ -1,14 +1,13 @@
 package io.ionic.portals
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
+import android.webkit.JavascriptInterface
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import com.getcapacitor.*
@@ -38,7 +37,6 @@ open class PortalFragment : Fragment {
     var portal: Portal? = null
     var liveUpdateFiles: File? = null
     var onBridgeAvailable: ((bridge: Bridge) -> Unit)? = null
-    var webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)? = null
 
     private var bridge: Bridge? = null
     private var keepRunning = true
@@ -56,14 +54,9 @@ open class PortalFragment : Fragment {
         this.portal = portal
     }
 
-    constructor(portal: Portal?, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(portal, onBridgeAvailable, null)
-
-    constructor(portal: Portal?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)) : this(portal, null, webVitalsCallback)
-
-    constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?, webVitalsCallback: ((WebVitals.Metric, Long) -> Unit)?) {
+    constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) {
         this.portal = portal
         this.onBridgeAvailable = onBridgeAvailable
-        this.webVitalsCallback = webVitalsCallback
     }
 
     /**
@@ -357,6 +350,7 @@ open class PortalFragment : Fragment {
     /**
      * Sets up the supporting JavaScript code that Portals needs on the web view content.
      */
+    @SuppressLint("JavascriptInterface")
     private fun setupPortalsJS() {
         val initialContext = this.initialContext ?: portal?.initialContext
 
@@ -383,6 +377,14 @@ open class PortalFragment : Fragment {
             portalInitialContext.put("value", initialContextValues)
         }
 
+        bridge?.webView?.addJavascriptInterface(
+            object {
+                @JavascriptInterface
+                fun initialContext() = portalInitialContext.toString()
+            },
+            "AndroidInitialContext"
+        )
+
         portal?.assetMaps?.let { assetmaps ->
             if (assetmaps.isNotEmpty()) {
                 val assetMapsJSON = JSONObject()
@@ -392,46 +394,6 @@ open class PortalFragment : Fragment {
                 portalInitialContext.put("assets", assetMapsJSON)
             }
         }
-
-        // Add interface for WebVitals interaction
-        webVitalsCallback?.let { webvitalsCallback ->
-            bridge?.webView?.addJavascriptInterface(WebVitals(portal!!.name, webvitalsCallback), "WebVitals")
-        }
-
-        val newWebViewClient = object: BridgeWebViewClient(bridge) {
-            var hasMainRun = false
-            var hasBeenSetup = false
-
-            override fun shouldInterceptRequest(
-                view: WebView?,
-                request: WebResourceRequest?
-            ): WebResourceResponse? {
-                view?.post {
-                    run {
-                        if (!hasBeenSetup && hasMainRun) {
-                            // Add WebVitals javascript to the webview
-                            webVitalsCallback?.let { webvitalsCallback ->
-                                view.evaluateJavascript(WebVitals(portal!!.name, webvitalsCallback).js, null)
-                            }
-
-
-                            hasBeenSetup = true
-                        }
-
-                        hasMainRun = true
-
-                        // Add initial context to the webview
-                        view.evaluateJavascript(
-                            "window.portalInitialContext = $portalInitialContext", null
-                        )
-                    }
-                }
-
-                return super.shouldInterceptRequest(view, request)
-            }
-        }
-
-        bridge?.webView?.webViewClient = newWebViewClient
     }
 
     /**
