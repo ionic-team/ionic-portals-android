@@ -8,7 +8,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * feat: update to Capacitor 5.0 and Gradle dependency updates
 * feat: updates to the pub/sub system
 * feat: converts WebVitals feature into an optional plugin
-* feat: update dependencies Live Updates
+* chore: update dependencies Live Updates
 
 
 
