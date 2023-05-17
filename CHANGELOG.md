@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0]() (2023-05-17)
+
+* feat: update to Capacitor 5.0 and Gradle dependency updates
+* feat: updates to the pub/sub system
+* feat: converts WebVitals feature into an optional plugin
+* chore: update dependencies Live Updates
+
+
+
+
+
 # [0.7.5]() (2023-04-03)
 
 * chore: update dependencies for Capacitor updates and Live Updates feat
