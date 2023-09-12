@@ -32,10 +32,14 @@ import java.security.spec.X509EncodedKeySpec
  * ```
  */
 object PortalManager {
-    @JvmStatic private val portals: MutableMap<String, Portal> = mutableMapOf()
-    @JvmStatic private var registered: Boolean = false
-    @JvmStatic private var unregisteredMessageShown: Boolean = false
-    @JvmStatic private var registeredError: Boolean = false
+    @JvmStatic
+    private val portals: MutableMap<String, Portal> = mutableMapOf()
+    @JvmStatic
+    private var registered: Boolean = false
+    @JvmStatic
+    private var unregisteredMessageShown: Boolean = false
+    @JvmStatic
+    private var registeredError: Boolean = false
 
     /**
      * Adds a Portal to the Portal Manager. This is not necessary if the Portal is created using
@@ -43,7 +47,8 @@ object PortalManager {
      *
      * @param portal The Portal to add
      */
-    @JvmStatic fun addPortal(portal: Portal) {
+    @JvmStatic
+    fun addPortal(portal: Portal) {
         portals[portal.name] = portal
 
         if (!registered && !unregisteredMessageShown) {
@@ -52,7 +57,7 @@ object PortalManager {
     }
 
     /**
-     * Returns a [Portal] object given the name of the portal.
+     * Returns a [Portal] object given the name of the portal. If the portal does not exist, an exception is thrown.
      *
      * Example usage (kotlin):
      * ```kotlin
@@ -67,12 +72,25 @@ object PortalManager {
      * @param name the portal name
      * @throws NoSuchElementException throws this exception if the Portal does not exist
      */
-    @JvmStatic fun getPortal(name: String): Portal {
+    @JvmStatic
+    fun getPortal(name: String): Portal {
         if (registeredError) {
             registrationError()
         }
 
         return portals[name] ?: throw IllegalStateException("Portal with portalId $name not found in PortalManager")
+    }
+
+    /**
+     * Removes the Portal from the Portal Manager. The Portal will be returned if it was present. If not, null is returned.
+     * Note: if the Portal uses Live Updates and registered an instance on creation, the Live Update instance for the app
+     * is not removed.
+     *
+     * @param name the name of the Portal to remove
+     */
+    @JvmStatic
+    fun removePortal(name: String): Portal? {
+        return portals.remove(name)
     }
 
     /**
@@ -90,7 +108,8 @@ object PortalManager {
      *
      * @return how many Portals are managed by the Portal Manager
      */
-    @JvmStatic fun size(): Int {
+    @JvmStatic
+    fun size(): Int {
         return portals.size
     }
 
@@ -110,7 +129,8 @@ object PortalManager {
      *
      * @param key The key for Portals provided by the Ionic dashboard
      */
-    @JvmStatic fun register(key : String) {
+    @JvmStatic
+    fun register(key: String) {
         registered = verify(key)
     }
 
@@ -119,7 +139,8 @@ object PortalManager {
      *
      * @return true if Portals is successfully registered
      */
-    @JvmStatic fun isRegistered(): Boolean {
+    @JvmStatic
+    fun isRegistered(): Boolean {
         return registered
     }
 
@@ -194,7 +215,7 @@ object PortalManager {
                 registrationError()
                 false
             }
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             registrationError()
         }
 
