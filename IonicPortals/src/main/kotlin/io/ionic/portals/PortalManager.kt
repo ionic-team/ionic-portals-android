@@ -57,7 +57,7 @@ object PortalManager {
     }
 
     /**
-     * Returns a [Portal] object given the name of the portal.
+     * Returns a [Portal] object given the name of the portal. If the portal does not exist, an exception is thrown.
      *
      * Example usage (kotlin):
      * ```kotlin
