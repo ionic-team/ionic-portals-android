@@ -65,6 +65,11 @@ class PortalView : FrameLayout {
     var portalId: String? = null
 
     /**
+     * The Portal Object to display.
+     */
+    var portal: Portal? = null
+
+    /**
      * The ID of the Android view.
      */
     var viewId: String? = null
@@ -81,6 +86,18 @@ class PortalView : FrameLayout {
     constructor(context: Context, portalId: String, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super(context) {
         this.onBridgeAvailable = onBridgeAvailable
         this.portalId = portalId
+        this.viewId = viewId
+        this.id = View.generateViewId()
+        loadPortal(context, null)
+    }
+
+    constructor(context: Context, portal: Portal) : this(context, portal, portal.name+"_view", null)
+    constructor(context: Context, portal: Portal, onBridgeAvailable: (bridge: Bridge) -> Unit) : this(context, portal, portal.name+"_view", onBridgeAvailable)
+
+    constructor(context: Context, portal: Portal, viewId: String, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super(context) {
+        this.onBridgeAvailable = onBridgeAvailable
+        this.portal = portal
+        this.portalId = portal.name
         this.viewId = viewId
         this.id = View.generateViewId()
         loadPortal(context, null)
@@ -150,7 +167,7 @@ class PortalView : FrameLayout {
         }
 
         portalId?.let {
-            val portal: Portal = PortalManager.getPortal(it)
+            val portal = portal ?: PortalManager.getPortal(it)
 
             if (id <= 0) {
                 throw IllegalStateException("Portals must have an android:id defined")
