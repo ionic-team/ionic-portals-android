@@ -158,12 +158,12 @@ class PortalView : FrameLayout {
     fun loadPortal(fm: FragmentManager, attrs: AttributeSet?) {
         val id = id
 
-        if (PortalManager.size() == 0) {
+        if (portal == null && PortalManager.size() == 0) {
             throw Exception("Ionic Portals has not been setup with any Portals!")
         }
 
         if (portalId == null) {
-            throw IllegalStateException("Portal views must have a defined portalId")
+            throw IllegalStateException("Portal views must have a defined portalId or be provided a Portal object")
         }
 
         portalId?.let {
