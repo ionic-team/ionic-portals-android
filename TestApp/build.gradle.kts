@@ -44,7 +44,7 @@ android {
 
 androidComponents {
     onVariants {
-        it.buildConfigFields.put("PORTALS_KEY", BuildConfigField("String", getApiKey(), "portals registration key"))
+        it.buildConfigFields.put("PORTALS_KEY", BuildConfigField("String", getPortalsKey(), "portals registration key"))
     }
 }
 
@@ -57,9 +57,12 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.espresso:espresso-web:3.5.1")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
 }
 
-fun getApiKey(): String {
+fun getPortalsKey(): String {
     val propFile = rootProject.file("local.properties")
     val properties = Properties()
     properties.load(FileInputStream(propFile))
