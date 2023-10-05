@@ -5,6 +5,8 @@ import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
 import androidx.test.espresso.web.model.Atoms.castOrDie
 import androidx.test.espresso.web.model.Atoms.script
 import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.espresso.web.webdriver.DriverAtoms
+import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.ionic.portals.PortalManager
 import org.hamcrest.CoreMatchers.containsString
@@ -20,6 +22,13 @@ class InitialContextTests {
     @Before
     fun setUp() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
+    }
+
+    @Test
+    fun verify_web_content_is_displayed__when_portal_loads() {
+        onWebView()
+            .withElement(DriverAtoms.findElement(Locator.CLASS_NAME, "container"))
+            .check(webMatches(DriverAtoms.getText(), containsString("The web page loaded successfully.")))
     }
 
     @Test
