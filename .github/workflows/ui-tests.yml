@@ -32,7 +32,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-32
+          key: avd-aosp-32
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-aosp-cache.outputs.cache-hit != 'true'
