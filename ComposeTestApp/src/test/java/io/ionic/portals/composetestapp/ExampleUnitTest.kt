@@ -1,4 +1,4 @@
-package io.ionic.portals.testapp
+package io.ionic.portals.composetestapp
 
 import org.junit.Test
 
