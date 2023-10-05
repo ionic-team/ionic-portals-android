@@ -27,7 +27,7 @@ jobs:
 
       - name: AVD cache
         uses: actions/cache@v3
-        id: avd-cache
+        id: avd-aosp-cache
         with:
           path: |
             ~/.android/avd/*
@@ -35,7 +35,7 @@ jobs:
           key: avd-32
 
       - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
+        if: steps.avd-aosp-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 32
