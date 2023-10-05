@@ -14,4 +14,4 @@ pluginManagement {
 rootProject.name = "IonicPortals"
 include ':IonicPortals'
 include ':TestApp'
-include ':ComposeTestApp'
+include ':TestAppCompose'
