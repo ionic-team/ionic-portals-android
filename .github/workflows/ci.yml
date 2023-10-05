@@ -44,6 +44,8 @@ jobs:
       - setup
     steps:
       - uses: actions/checkout@v2
+      - name: create local.properties file for app creds
+      - run: echo portals_key=\"replace me with real key\" > ./local.properties
       - name: set up JDK 17
         uses: actions/setup-java@v2
         with:
