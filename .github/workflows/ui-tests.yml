@@ -27,18 +27,18 @@ jobs:
 
       - name: AVD cache
         uses: actions/cache@v3
-        id: avd-aosp-cache
+        id: avd-aosp-30-cache
         with:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-aosp-32
+          key: avd-aosp-30
 
       - name: create AVD and generate snapshot for caching
-        if: steps.avd-aosp-cache.outputs.cache-hit != 'true'
+        if: steps.avd-aosp-30-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 32
+          api-level: 30
           arch: x86_64
           target: aosp_atd
           profile: pixel
@@ -50,7 +50,7 @@ jobs:
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 32
+          api-level: 30
           arch: x86_64
           target: aosp_atd
           profile: pixel
