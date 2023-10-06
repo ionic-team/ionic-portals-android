@@ -39,7 +39,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          arch: x86_64
+          arch: x86
           target: aosp_atd
           profile: pixel
           force-avd-creation: false
@@ -51,7 +51,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          arch: x86_64
+          arch: x86
           target: aosp_atd
           profile: pixel
           force-avd-creation: false
