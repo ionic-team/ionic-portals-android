@@ -27,20 +27,20 @@ jobs:
 
       - name: AVD cache
         uses: actions/cache@v3
-        id: avd-aosp-30-cache
+        id: avd-30-cache
         with:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-aosp-30
+          key: avd-30
 
       - name: create AVD and generate snapshot for caching
-        if: steps.avd-aosp-30-cache.outputs.cache-hit != 'true'
+        if: steps.avd-30-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          arch: x86
-          target: aosp_atd
+          arch: x86_64
+          target: playstore
           profile: pixel
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -51,8 +51,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          arch: x86
-          target: aosp_atd
+          arch: x86_64
+          target: playstore
           profile: pixel
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
