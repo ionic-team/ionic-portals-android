@@ -2,7 +2,7 @@ name: Deploy docs PR preview
 
 on: pull_request
   paths:
-    - 'IonicPortals/**'
+    - 'IonicPortals/src/main/**'
 
 permissions:
   contents: read
