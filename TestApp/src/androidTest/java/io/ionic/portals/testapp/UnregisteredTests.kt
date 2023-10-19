@@ -1,5 +1,6 @@
 package io.ionic.portals.testapp
 
+import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -20,7 +21,11 @@ class UnregisteredTests {
 
     @Before
     fun setUp() {
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        scenario = ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+            activity.sendBroadcast(
+                Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            )
+        };
     }
 
     @Test
