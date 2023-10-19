@@ -338,7 +338,7 @@ open class PortalFragment : Fragment {
         } else if (PortalManager.isRegisteredError()) {
             if(activity != null) {
                 val alert = AlertDialog.Builder(activity)
-                alert.setMessage("Error validating your key for Ionic Portals. Check your key and try again.")
+                alert.setMessage(getString(R.string.invalid_portals_key))
                 alert.setPositiveButton("OK") { dialog, _ ->
                     dialog.dismiss()
                 }

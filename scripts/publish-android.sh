@@ -3,7 +3,6 @@
 ANDROID_DIR=../
 LOG_OUTPUT=./tmp/portals-android.txt
 PORTALS_VERSION=`grep '"version": ' $ANDROID_DIR/package.json | awk '{print $2}' | tr -d '",'`
-echo Attempting to build and publish Portals native library with version $PORTALS_VERSION
 
 # Get latest io.ionic:portals XML version info
 PORTALS_PUBLISHED_URL="https://repo1.maven.org/maven2/io/ionic/portals/maven-metadata.xml"
