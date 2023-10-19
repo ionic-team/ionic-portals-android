@@ -1,6 +1,8 @@
 package io.ionic.portals.composetestapp
 
+import android.content.Intent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -8,6 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.ionic.portals.PortalManager
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +22,15 @@ class UnregisteredTests {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun setUp() {
+        ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
+            activity.sendBroadcast(
+                Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            )
+        };
+    }
 
     @Test
     fun when_portals_is_not_registered__display_unregistered_view() {
