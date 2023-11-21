@@ -3,6 +3,7 @@ name: Run UI Tests
 on:
   pull_request:
     paths:
+    - './github/workflows/ui-tests.yml'
     - 'IonicPortals/**'
     - 'TestApp/**'
     - 'TestAppCompose/**'
