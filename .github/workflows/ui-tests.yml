@@ -10,6 +10,11 @@ on:
 
 jobs:
   test:
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+
     runs-on: macos-latest
     steps:
       - name: checkout
