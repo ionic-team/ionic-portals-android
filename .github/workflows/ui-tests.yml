@@ -28,39 +28,26 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Gradle cache
+      - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: AVD cache
-        uses: actions/cache@v3
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-aosp-30
+      - name: Run build for testing
+        run: ./gradlew assembleDebug assembleAndroidTest
 
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          api-level: 30
-          target: aosp_atd
-          arch: x86
-          profile: pixel
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+          role-to-assume: arn:aws:iam::068591690524:role/github-ionic-portals-android
+          aws-region: us-east-1
 
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: Schedule test
+        uses: realm/aws-devicefarm/test-application@master
         with:
-          api-level: 30
-          target: aosp_atd
-          arch: x86
-          profile: pixel
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: ./gradlew connectedCheck
+          name: test-application
+          project_arn: ${{ secrets.AWS_PROJECT_ARN }}
+          device_pool_arn: ${{ secrets.AWS_DEVICE_POOL_ARN }}
+          app_file: ./TestApp/build/outputs/apk/debug/TestApp-debug.apk
+          app_type: ANDROID_APP
+          test_type: INSTRUMENTATION
+          test_package_file: ./TestApp/build/outputs/apk/androidTest/debug/TestApp-debug-androidTest.apk
+          test_package_type: INSTRUMENTATION_TEST_PACKAGE
