@@ -44,7 +44,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::068591690524:role/github-ionic-portals-android
-          aws-region: us-east-1
+          aws-region: us-west-2
 
       - name: Schedule test
         uses: realm/aws-devicefarm/test-application@master
