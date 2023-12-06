@@ -7,6 +7,8 @@ import android.graphics.Canvas
 import android.os.Build
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
@@ -191,12 +193,18 @@ class PortalView : FrameLayout {
             attrs?.let { attributeSet ->
                 portalFragment?.onInflate(context, attributeSet, null)
             }
+
             val handler = Handler()
             val runnable = Runnable {
-                fmTransaction
-                    .setReorderingAllowed(true)
-                    .add(id, portalFragment!!, "")
-                    .commitNowAllowingStateLoss()
+                val thisView = findViewById<PortalView>(id)
+                if(thisView != null) {
+                    fmTransaction
+                        .setReorderingAllowed(true)
+                        .add(id, portalFragment!!, "")
+                        .commitNowAllowingStateLoss()
+                } else {
+                    Log.w("PortalView", "Unable to find active PortalView with id: $id. Skipping Portal inflation.")
+                }
             }
 
             handler.post(runnable)

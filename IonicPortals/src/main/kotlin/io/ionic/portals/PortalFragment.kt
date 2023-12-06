@@ -11,6 +11,7 @@ import android.webkit.JavascriptInterface
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import com.getcapacitor.*
+import io.ionic.liveupdates.BuildConfig
 import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
 import org.json.JSONObject
@@ -47,6 +48,9 @@ open class PortalFragment : Fragment {
     private var subscriptions = mutableMapOf<String, Int>()
     private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
+
+    private val devURL: String = "${context?.packageName}.${portal?.name}.url"
+    private val devConfig: String = "${context?.packageName}.${portal?.name}.config"
 
     constructor()
 
@@ -234,7 +238,7 @@ open class PortalFragment : Fragment {
      * If Live Updates is used and the web content was updated, the new content will be loaded.
      */
     fun reload() {
-        if(portal?.liveUpdateConfig != null) {
+        if(portal?.devMode == false && portal?.liveUpdateConfig != null) {
             val latestLiveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
             if (latestLiveUpdateFiles != null) {
                 if (liveUpdateFiles == null || liveUpdateFiles!!.path != latestLiveUpdateFiles.path) {

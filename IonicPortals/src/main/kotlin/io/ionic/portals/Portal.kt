@@ -68,6 +68,11 @@ class Portal(val name: String) {
         get() = if (field.isEmpty()) name else field
 
     /**
+     * If the Portal should be loaded in development mode and look for a server URL.
+     */
+    var devMode: Boolean = false
+
+    /**
      * A LiveUpdate config, if live updates is being used.
      */
     var liveUpdateConfig: LiveUpdate? = null
@@ -296,9 +301,10 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
+    private var devMode: Boolean = false
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
-        this.onCreate = onCreate;
+        this.onCreate = onCreate
     }
 
     /**
@@ -544,6 +550,14 @@ class PortalBuilder(val name: String) {
     }
 
     /**
+     * Set development mode on the Portal which will look for a server URL set by the Portals CLI.
+     */
+    fun setDevMode(devMode: Boolean): PortalBuilder {
+        this.devMode = devMode
+        return this
+    }
+
+    /**
      * Creates the [Portal] instance from the current state of the [PortalBuilder] provided.
      * This finishes building the Portal.
      *
@@ -568,6 +582,7 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
+        portal.devMode = this.devMode
         onCreate(portal)
         return portal
     }
