@@ -10,11 +10,10 @@ if (System.getenv("PORTALS_PUBLISH") == "true") {
 
 android {
     namespace = "io.ionic.portals"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 22
-        targetSdk = 33
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -45,7 +44,7 @@ android {
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:[5.5.0,5.6.0)")
+    api("com.capacitorjs:core:6.0.0-rc.0")
     compileOnly("io.ionic:liveupdates:0.4.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
