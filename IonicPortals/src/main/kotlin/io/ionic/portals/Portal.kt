@@ -535,7 +535,7 @@ class PortalBuilder(val name: String) {
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
         this.liveUpdateConfig = liveUpdateConfig
         if(liveUpdateConfig.assetPath == null) {
-            liveUpdateConfig.assetPath = _startDir
+            liveUpdateConfig.assetPath = this._startDir ?: this.name
         }
 
         LiveUpdateManager.initialize(context)
