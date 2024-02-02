@@ -572,7 +572,6 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
-
         onCreate(portal)
         return portal
     }
