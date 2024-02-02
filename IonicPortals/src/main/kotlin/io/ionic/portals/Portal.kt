@@ -568,6 +568,10 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
+        if(portal.liveUpdateConfig?.assetPath == null) {
+            portal.liveUpdateConfig?.assetPath = portal.startDir
+        }
+
         onCreate(portal)
         return portal
     }
