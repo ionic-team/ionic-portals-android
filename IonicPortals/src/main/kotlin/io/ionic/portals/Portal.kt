@@ -71,6 +71,14 @@ class Portal(val name: String) {
      * A LiveUpdate config, if live updates is being used.
      */
     var liveUpdateConfig: LiveUpdate? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                if(value.assetPath == null) {
+                    value.assetPath = this.startDir
+                }
+            }
+        }
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
