@@ -534,6 +534,10 @@ class PortalBuilder(val name: String) {
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
         this.liveUpdateConfig = liveUpdateConfig
+        if(liveUpdateConfig.assetPath == null) {
+            liveUpdateConfig.assetPath = _startDir
+        }
+
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
         LiveUpdateManager.addLiveUpdateInstance(context, liveUpdateConfig)
@@ -568,9 +572,6 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
-        if(portal.liveUpdateConfig?.assetPath == null) {
-            portal.liveUpdateConfig?.assetPath = portal.startDir
-        }
 
         onCreate(portal)
         return portal
