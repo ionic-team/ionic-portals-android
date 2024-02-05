@@ -71,6 +71,14 @@ class Portal(val name: String) {
      * A LiveUpdate config, if live updates is being used.
      */
     var liveUpdateConfig: LiveUpdate? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                if(value.assetPath == null) {
+                    value.assetPath = this.startDir
+                }
+            }
+        }
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
@@ -534,6 +542,10 @@ class PortalBuilder(val name: String) {
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
         this.liveUpdateConfig = liveUpdateConfig
+        if(liveUpdateConfig.assetPath == null) {
+            liveUpdateConfig.assetPath = this._startDir ?: this.name
+        }
+
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
         LiveUpdateManager.addLiveUpdateInstance(context, liveUpdateConfig)
