@@ -8,9 +8,7 @@ on:
 jobs:
   publish-android:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
+    permissions: write-all
     steps:
       - uses: actions/checkout@v2
       - name: create local.properties file for app creds
