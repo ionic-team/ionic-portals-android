@@ -1,13 +1,17 @@
 package io.ionic.portals
 
-import android.annotation.SuppressLint
 import android.content.Context
 import com.getcapacitor.CapConfig
-import com.getcapacitor.Logger
 
+/**
+ * This class is used to load the server URL and Capacitor configuration from the assets folder when the app
+ * is being run in developer mode with the Portals CLI.
+ */
 object DevConfiguration {
 
-    @SuppressLint("PrivateApi")
+    /**
+     * Get the server URL for the given portal name from the developer mode assets folder.
+     */
     fun getServerUrl(context: Context, portalName: String): String? {
         val portalDirName = "$portalName.debug"
         val generalDirName = "portal.debug"
@@ -35,7 +39,9 @@ object DevConfiguration {
         return serverUrl
     }
 
-    @SuppressLint("PrivateApi")
+    /**
+     * Get the Capacitor configuration for the given portal name from the developer mode assets folder.
+     */
     fun getCapacitorConfig(context: Context, portalName: String): CapConfig? {
         val portalDirName = "$portalName.debug"
         val generalDirName = "portal.debug"
