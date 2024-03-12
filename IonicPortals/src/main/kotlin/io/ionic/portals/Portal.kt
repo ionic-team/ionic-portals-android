@@ -301,7 +301,7 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
-    private var devMode: Boolean = false
+    private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
         this.onCreate = onCreate
@@ -551,6 +551,10 @@ class PortalBuilder(val name: String) {
 
     /**
      * Set development mode on the Portal which will look for a server URL set by the Portals CLI.
+     * This is set to true by default but can be turned off manually if desired.
+     *
+     * @param devMode if the Portal should be loaded in development mode
+     * @return the instance of the PortalBuilder with the development mode set
      */
     fun setDevMode(devMode: Boolean): PortalBuilder {
         this.devMode = devMode

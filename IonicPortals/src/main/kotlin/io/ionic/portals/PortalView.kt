@@ -203,7 +203,7 @@ class PortalView : FrameLayout {
                         .add(id, portalFragment!!, "")
                         .commitNowAllowingStateLoss()
                 } else {
-                    Log.w("PortalView", "Unable to find active PortalView with id: $id. Skipping Portal inflation.")
+                    Log.e("PortalView", "A problem occurred. Unable to find loaded container with id: $id. Skipping Portal inflation.")
                 }
             }
 
