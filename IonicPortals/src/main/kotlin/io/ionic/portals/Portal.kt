@@ -70,7 +70,7 @@ class Portal(val name: String) {
     /**
      * If the Portal should be loaded in development mode and look for a server URL.
      */
-    var devMode: Boolean = false
+    var devMode: Boolean = true
 
     /**
      * A LiveUpdate config, if live updates is being used.
