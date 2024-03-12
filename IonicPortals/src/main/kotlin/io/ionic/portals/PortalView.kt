@@ -192,6 +192,7 @@ class PortalView : FrameLayout {
             attrs?.let { attributeSet ->
                 portalFragment?.onInflate(context, attributeSet, null)
             }
+
             val handler = Handler()
             val runnable = Runnable {
                 val thisView = findViewById<PortalView>(id)

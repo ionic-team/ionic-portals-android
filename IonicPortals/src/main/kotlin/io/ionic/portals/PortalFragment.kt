@@ -2,6 +2,7 @@ package io.ionic.portals
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
+import java.lang.reflect.Field
 import kotlin.reflect.KVisibility
 
 /**
@@ -282,7 +284,7 @@ open class PortalFragment : Fragment {
                         .setInstanceState(savedInstanceState)
                         .setPlugins(initialPlugins)
                         .addPluginInstances(initialPluginInstances)
-                        .addWebViewListeners(webViewListeners);
+                        .addWebViewListeners(webViewListeners)
 
                     if (portal?.liveUpdateConfig != null) {
                         liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
@@ -324,6 +326,31 @@ open class PortalFragment : Fragment {
 
                     if(configToUse == null) {
                         configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                    }
+
+                    // Dev mode
+                    val isDebuggable = 0 != requireContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                    if (isDebuggable && portal?.devMode == true) {
+                        val devConfig = DevConfiguration.getCapacitorConfig(requireContext(), portal?.name!!)
+                        if (devConfig != null) {
+                            configToUse = devConfig
+                        } else {
+                            Logger.debug("No dev config set by Portals CLI for portal ${portal?.name}, loading the non-debug config")
+                        }
+
+                        val devUrl = DevConfiguration.getServerUrl(requireContext(), portal?.name!!)
+                        if (devUrl != null && configToUse != null) {
+                            val devModeField: Field = configToUse.javaClass.getDeclaredField("serverUrl")
+                            devModeField.isAccessible = true
+                            devModeField.set(configToUse, devUrl)
+                        } else {
+                            val noDevUrlMsg = "No dev URL set by Portals CLI for portal ${portal?.name}"
+                            if (devConfig != null && devConfig.serverUrl != null) {
+                                Logger.debug("$noDevUrlMsg, using URL from dev config")
+                            } else {
+                                Logger.debug("$noDevUrlMsg, loading Portal from assets")
+                            }
+                        }
                     }
 
                     bridgeBuilder = bridgeBuilder.setConfig(configToUse)
