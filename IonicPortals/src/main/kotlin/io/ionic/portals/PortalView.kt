@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.getcapacitor.Bridge
+import com.getcapacitor.Logger
 import java.util.ArrayList
 
 /**
@@ -203,7 +204,7 @@ class PortalView : FrameLayout {
                         .add(id, portalFragment!!, "")
                         .commitNowAllowingStateLoss()
                 } else {
-                    Log.e("PortalView", "A problem occurred. Unable to find loaded container with id: $id. Skipping Portal inflation.")
+                    Logger.warn("PortalView", "Unable to find active PortalView with id: $id. Skipping Portal inflation.")
                 }
             }
 
