@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.getcapacitor.*
 import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
@@ -50,15 +51,40 @@ open class PortalFragment : Fragment {
     private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
 
+    private var viewModel: PortalViewModel? = null
+
     constructor()
 
     constructor(portal: Portal?) {
         this.portal = portal
     }
 
+    constructor(portal: Portal?, viewModel: PortalViewModel) {
+        this.portal = portal
+        this.viewModel = viewModel
+    }
+
     constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) {
         this.portal = portal
         this.onBridgeAvailable = onBridgeAvailable
+    }
+
+    constructor(portal: Portal?, viewModel: PortalViewModel, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super() {
+        this.portal = portal
+        this.viewModel = viewModel
+        this.onBridgeAvailable = onBridgeAvailable
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        portal?.let { portal ->
+            viewModel?.let { viewModel ->
+                viewModel.state.value = portal
+            } ?: run {
+                viewModel = viewModels<PortalViewModel>().value
+                viewModel?.state?.value = portal
+            }
+        }
     }
 
     /**
@@ -80,6 +106,9 @@ open class PortalFragment : Fragment {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel?.state?.value?.let {
+            portal = it
+        }
         load(savedInstanceState)
     }
 
@@ -100,6 +129,15 @@ open class PortalFragment : Fragment {
     }
 
     /**
+     * Extends the Android Fragment 'onStart' lifecycle event.
+     */
+    override fun onStart() {
+        super.onStart()
+        bridge?.onStart()
+        Logger.debug("App started")
+    }
+
+    /**
      * Extends the Android Fragment 'onResume' lifecycle event.
      */
     override fun onResume() {
@@ -116,6 +154,15 @@ open class PortalFragment : Fragment {
         super.onPause()
         bridge?.onPause()
         Logger.debug("App paused")
+    }
+
+    /**
+     * Extends the Android Fragment 'onStop' lifecycle event.
+     */
+    override fun onStop() {
+        super.onStop()
+        bridge?.onStop()
+        Logger.debug("App stopped")
     }
 
     /**
