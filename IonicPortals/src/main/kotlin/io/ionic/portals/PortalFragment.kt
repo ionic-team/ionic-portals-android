@@ -75,6 +75,9 @@ open class PortalFragment : Fragment {
         this.onBridgeAvailable = onBridgeAvailable
     }
 
+    /**
+     * Extends the Android Fragment `onCreate` lifecycle event.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         portal?.let { portal ->
