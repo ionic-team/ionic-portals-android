@@ -10,11 +10,10 @@ if (System.getenv("PORTALS_PUBLISH") == "true") {
 
 android {
     namespace = "io.ionic.portals"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 22
-        targetSdk = 33
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
