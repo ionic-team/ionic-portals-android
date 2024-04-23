@@ -1,9 +1,6 @@
 name: Publish Native Android Library
 
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   publish-android:
@@ -24,13 +21,6 @@ jobs:
         run: chmod +x ./gradlew
       - name: Grant execute permission for publishing script
         run: chmod +x ./scripts/publish-android.sh
-      - name: Assemble release and add artifact to GH Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ github.event_name == 'release' }}
-        run: |
-          ./gradlew assembleRelease
-          gh release upload ${{ github.event.release.tag_name }} ./IonicPortals/build/outputs/aar/*.aar
       - name: Run publish script
         working-directory: ./scripts
         env:

@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.getcapacitor.Bridge
+import com.getcapacitor.Logger
 import java.util.ArrayList
 
 /**
@@ -191,12 +192,18 @@ class PortalView : FrameLayout {
             attrs?.let { attributeSet ->
                 portalFragment?.onInflate(context, attributeSet, null)
             }
+
             val handler = Handler()
             val runnable = Runnable {
-                fmTransaction
-                    .setReorderingAllowed(true)
-                    .add(id, portalFragment!!, "")
-                    .commitNowAllowingStateLoss()
+                val thisView = findViewById<PortalView>(id)
+                if(thisView != null) {
+                    fmTransaction
+                        .setReorderingAllowed(true)
+                        .add(id, portalFragment!!, "")
+                        .commitNowAllowingStateLoss()
+                } else {
+                    Logger.warn("PortalView", "Unable to find active PortalView with id: $id. Skipping Portal inflation.")
+                }
             }
 
             handler.post(runnable)
