@@ -51,7 +51,8 @@ open class PortalFragment : Fragment {
     private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
 
-    private var viewModel: PortalViewModel? = null
+    private val viewModel: PortalViewModel by viewModels()
+    private var providedViewModel: PortalViewModel? = null
 
     constructor()
 
@@ -61,7 +62,7 @@ open class PortalFragment : Fragment {
 
     constructor(portal: Portal?, viewModel: PortalViewModel) {
         this.portal = portal
-        this.viewModel = viewModel
+        this.providedViewModel = viewModel
     }
 
     constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) {
@@ -71,7 +72,7 @@ open class PortalFragment : Fragment {
 
     constructor(portal: Portal?, viewModel: PortalViewModel, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super() {
         this.portal = portal
-        this.viewModel = viewModel
+        this.providedViewModel = viewModel
         this.onBridgeAvailable = onBridgeAvailable
     }
 
@@ -81,11 +82,10 @@ open class PortalFragment : Fragment {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         portal?.let { portal ->
-            viewModel?.let { viewModel ->
+            if(providedViewModel != null) {
+                providedViewModel?.state?.value = portal
+            } else {
                 viewModel.state.value = portal
-            } ?: run {
-                viewModel = viewModels<PortalViewModel>().value
-                viewModel?.state?.value = portal
             }
         }
     }
@@ -109,8 +109,14 @@ open class PortalFragment : Fragment {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel?.state?.value?.let {
-            portal = it
+        if (providedViewModel != null) {
+            providedViewModel?.state?.value?.let {
+                portal = it
+            }
+        } else {
+            viewModel.state.value?.let {
+                portal = it
+            }
         }
         load(savedInstanceState)
     }
