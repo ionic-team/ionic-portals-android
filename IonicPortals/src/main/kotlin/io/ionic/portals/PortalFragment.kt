@@ -52,7 +52,6 @@ open class PortalFragment : Fragment {
     private var initialContext: Any? = null
 
     private val viewModel: PortalViewModel by viewModels()
-    private var providedViewModel: PortalViewModel? = null
 
     constructor()
 
@@ -60,19 +59,8 @@ open class PortalFragment : Fragment {
         this.portal = portal
     }
 
-    constructor(portal: Portal?, viewModel: PortalViewModel) {
-        this.portal = portal
-        this.providedViewModel = viewModel
-    }
-
     constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) {
         this.portal = portal
-        this.onBridgeAvailable = onBridgeAvailable
-    }
-
-    constructor(portal: Portal?, viewModel: PortalViewModel, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) : super() {
-        this.portal = portal
-        this.providedViewModel = viewModel
         this.onBridgeAvailable = onBridgeAvailable
     }
 
@@ -82,11 +70,7 @@ open class PortalFragment : Fragment {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         portal?.let { portal ->
-            if(providedViewModel != null) {
-                providedViewModel?.state?.value = portal
-            } else {
-                viewModel.state.value = portal
-            }
+            viewModel.state.value = portal
         }
     }
 
@@ -109,14 +93,8 @@ open class PortalFragment : Fragment {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (providedViewModel != null) {
-            providedViewModel?.state?.value?.let {
-                portal = it
-            }
-        } else {
-            viewModel.state.value?.let {
-                portal = it
-            }
+        viewModel.state.value?.let {
+            portal = it
         }
         load(savedInstanceState)
     }

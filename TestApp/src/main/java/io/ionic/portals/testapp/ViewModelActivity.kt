@@ -21,8 +21,7 @@ class ViewModelActivity : AppCompatActivity() {
                 add(
                     R.id.fragmentContainerView,
                     PortalFragment(
-                        portal = PortalBuilder("testportal").create(),
-                        viewModel = viewModel
+                        portal = PortalBuilder("testportal").create()
                     ),
                     "test"
                 )
