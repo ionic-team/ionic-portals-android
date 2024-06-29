@@ -116,22 +116,6 @@ open class PortalFragment : Fragment {
     }
 
     /**
-     * Extends the Android Fragment 'onDestroy' lifecycle event.
-     * At this point in the lifecycle the fragment will attempt to clean up the [Bridge] and
-     * unsubscribe any attached Portals message subscriptions.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        if (bridge != null) {
-            bridge?.onDestroy()
-            bridge?.onDetachedFromWindow()
-        }
-        for ((topic, ref) in subscriptions) {
-            pubSub.unsubscribe(topic, ref)
-        }
-    }
-
-    /**
      * Extends the Android Fragment 'onStart' lifecycle event.
      */
     override fun onStart() {
@@ -166,6 +150,22 @@ open class PortalFragment : Fragment {
         super.onStop()
         bridge?.onStop()
         Logger.debug("App stopped")
+    }
+
+    /**
+     * Extends the Android Fragment 'onDestroy' lifecycle event.
+     * At this point in the lifecycle the fragment will attempt to clean up the [Bridge] and
+     * unsubscribe any attached Portals message subscriptions.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        if (bridge != null) {
+            bridge?.onDestroy()
+            bridge?.onDetachedFromWindow()
+        }
+        for ((topic, ref) in subscriptions) {
+            pubSub.unsubscribe(topic, ref)
+        }
     }
 
     /**
