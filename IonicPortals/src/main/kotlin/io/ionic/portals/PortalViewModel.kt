@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * ViewModel containing a Portal.
+ * Portal View Model
  */
 open class PortalViewModel: ViewModel() {
 
     /**
-     * MutableStateFlow for the Portal.
+     * MutableStateFlow containing a Portal.
      */
-    val state = MutableStateFlow<Portal?>(null)
+    val portal = MutableStateFlow<Portal?>(null)
 }

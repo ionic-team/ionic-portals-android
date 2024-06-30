@@ -70,7 +70,7 @@ open class PortalFragment : Fragment {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         portal?.let { portal ->
-            viewModel.state.value = portal
+            viewModel.portal.value = portal
         }
     }
 
@@ -93,7 +93,7 @@ open class PortalFragment : Fragment {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.state.value?.let {
+        viewModel.portal.value?.let {
             portal = it
         }
         load(savedInstanceState)
