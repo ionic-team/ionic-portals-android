@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /**
  * Portal View Model
  */
-open class PortalViewModel: ViewModel() {
+class PortalViewModel: ViewModel() {
 
     /**
      * MutableStateFlow containing a Portal.
