@@ -12,7 +12,7 @@ class ViewModelActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel: MyPortalViewModel by viewModels()
+        //val viewModel: MyPortalViewModel by viewModels()
 
         setContentView(R.layout.activity_viewmodel)
         if (savedInstanceState == null) {
