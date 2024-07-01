@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.getcapacitor.*
 import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
@@ -50,6 +51,8 @@ open class PortalFragment : Fragment {
     private var pubSub = PortalsPubSub.shared
     private var initialContext: Any? = null
 
+    private val viewModel: PortalViewModel by viewModels()
+
     constructor()
 
     constructor(portal: Portal?) {
@@ -59,6 +62,16 @@ open class PortalFragment : Fragment {
     constructor(portal: Portal?, onBridgeAvailable: ((bridge: Bridge) -> Unit)?) {
         this.portal = portal
         this.onBridgeAvailable = onBridgeAvailable
+    }
+
+    /**
+     * Extends the Android Fragment `onCreate` lifecycle event.
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        portal?.let { portal ->
+            viewModel.portal.value = portal
+        }
     }
 
     /**
@@ -80,6 +93,9 @@ open class PortalFragment : Fragment {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.portal.value?.let {
+            portal = it
+        }
         load(savedInstanceState)
     }
 
