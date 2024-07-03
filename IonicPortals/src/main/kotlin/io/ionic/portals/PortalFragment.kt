@@ -300,7 +300,13 @@ open class PortalFragment : Fragment {
 
                 val existingPortalName = savedInstanceState?.getString(PORTAL_NAME, null)
                 if (existingPortalName != null && portal == null) {
-                    portal = PortalManager.getPortal(existingPortalName)
+                    try {
+                        portal = PortalManager.getPortal(existingPortalName)
+                    } catch (e: Exception) {
+                        Logger.warn("Attempted to reload PortalFragment from App restore but portal not found.")
+                        Logger.warn("No portal named $existingPortalName found in PortalManager to use.")
+                        Logger.warn("Portal reload is unsuccessful. This is likely okay and safe to ignore if your app is returning from a force quit state.")
+                    }
                 }
 
                 if (portal != null) {
