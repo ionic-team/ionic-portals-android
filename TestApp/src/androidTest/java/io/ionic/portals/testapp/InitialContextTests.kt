@@ -7,6 +7,8 @@ import androidx.test.espresso.web.model.Atoms.castOrDie
 import androidx.test.espresso.web.model.Atoms.script
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms
+import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
+import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.ionic.portals.PortalManager
@@ -33,8 +35,8 @@ class InitialContextTests {
     @Test
     fun verify_web_content_is_displayed__when_portal_loads() {
         onWebView()
-            .withElement(DriverAtoms.findElement(Locator.CLASS_NAME, "container"))
-            .check(webMatches(DriverAtoms.getText(), containsString("The web page loaded successfully.")))
+            .withElement(findElement(Locator.XPATH, "/html/body/div/ion-app/div/ion-tabs/div/ion-router-outlet/div/ion-header/ion-toolbar/ion-title"))
+            .check(webMatches(getText(), containsString("Initial Context")))
     }
 
     @Test

@@ -4,10 +4,9 @@ import android.content.Intent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
-import androidx.test.espresso.web.matcher.DomMatchers.containingTextInBody
 import androidx.test.espresso.web.model.Atoms.castOrDie
 import androidx.test.espresso.web.model.Atoms.script
-import androidx.test.espresso.web.sugar.Web
+import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
@@ -39,9 +38,9 @@ class InitialContextTests {
     fun verify_web_content_is_displayed__when_portal_loads() {
         composeTestRule.waitForIdle()
 
-        Web.onWebView()
-            .withElement(findElement(Locator.CLASS_NAME, "container"))
-            .check(webMatches(getText(), containsString("The web page loaded successfully.")))
+        onWebView()
+            .withElement(findElement(Locator.XPATH, "/html/body/div/ion-app/div/ion-tabs/div/ion-router-outlet/div/ion-header/ion-toolbar/ion-title"))
+            .check(webMatches(getText(), containsString("Initial Context")))
     }
 
     @Test
@@ -49,7 +48,7 @@ class InitialContextTests {
         composeTestRule.waitForIdle()
 
         val script = script("return window.AndroidInitialContext.initialContext();", castOrDie(String::class.java))
-        Web.onWebView().check(webMatches(script, containsString("testportal")))
+        onWebView().check(webMatches(script, containsString("testportal")))
     }
 
     companion object {
