@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.ionic.portals.Portal
+import io.ionic.portals.PortalManager
 import io.ionic.portals.PortalView
 import io.ionic.portals.composetestapp.ui.theme.IonicPortalsTheme
 
@@ -22,7 +23,15 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    loadPortal(Portal("testportal"))
+                    val portalContext = mapOf(
+                        "test" to "hello is the context here? Testing... 1, 2, 3...",
+                    )
+
+                    PortalManager.newPortal("testportal")
+                        .setInitialContext(portalContext)
+                        .create()
+
+                    loadPortal("testportal")
                 }
             }
         }
@@ -30,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun loadPortal(portal: Portal) {
+fun loadPortal(portal: String) {
     AndroidView(factory = {
         PortalView(it, portal)
     })
