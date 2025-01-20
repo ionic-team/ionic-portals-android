@@ -11,10 +11,6 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@v2
-      - name: create local.properties file for app creds
-        env:
-          PORTALS_KEY: ${{ secrets.portals_key }}
-        run: echo portals_key=\"$PORTALS_KEY\" > ./local.properties
       - name: set up JDK 17
         uses: actions/setup-java@v2
         with:
@@ -24,6 +20,18 @@ jobs:
         run: chmod +x ./gradlew
       - name: Grant execute permission for publishing script
         run: chmod +x ./scripts/publish-android.sh
+      - name: Make local props
+        run: |
+          cat << EOF > "local.properties"
+          ossrhUsername=${{ secrets.ANDROID_OSSRH_USERNAME }}
+          ossrhPassword=${{ secrets.ANDROID_OSSRH_PASSWORD }}
+          sonatypeStagingProfileId=${{ secrets.ANDROID_SONATYPE_STAGING_PROFILE_ID }}
+          signing.keyId=${{ secrets.ANDROID_SIGNING_KEY_ID }}
+          signing.password=${{ secrets.ANDROID_SIGNING_PASSWORD }}
+          signing.key=${{ secrets.ANDROID_SIGNING_KEY }}
+          portals_key=${{ secrets.portals_key }}
+          EOF
+          echo "local.properties file has been created successfully."
       - name: Assemble release and add artifact to GH Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
