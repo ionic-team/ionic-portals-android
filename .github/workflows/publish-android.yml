@@ -29,7 +29,7 @@ jobs:
           signing.keyId=${{ secrets.ANDROID_SIGNING_KEY_ID }}
           signing.password=${{ secrets.ANDROID_SIGNING_PASSWORD }}
           signing.key=${{ secrets.ANDROID_SIGNING_KEY }}
-          portals_key=${{ secrets.portals_key }}
+          portals_key="${{ secrets.portals_key }}"
           EOF
           echo "local.properties file has been created successfully."
       - name: Assemble release and add artifact to GH Release
