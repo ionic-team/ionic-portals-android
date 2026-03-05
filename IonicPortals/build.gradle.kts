@@ -32,8 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    kotlinOptions {
+        jvmTarget = "21"
     }
     publishing {
         singleVariant("release")
@@ -51,6 +54,7 @@ dependencies {
 
     api("com.capacitorjs:core:[8.0.0,9.0.0)")
     compileOnly("io.ionic:liveupdates:0.5.5")
+    compileOnly("io.ionic:live-updates-provider:LOCAL-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.core:core-ktx:1.15.0")
