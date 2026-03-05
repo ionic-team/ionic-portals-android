@@ -18,9 +18,9 @@ jobs:
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get Latest
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: 22.x
       - uses: actions/checkout@v2
       - name: Restore Dependency Cache
         uses: actions/cache@v1
@@ -33,10 +33,10 @@ jobs:
         with:
           path: core/
       - name: set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
   verify-android:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -49,9 +49,9 @@ jobs:
           PORTALS_KEY: ${{ secrets.portals_key }}
         run: echo portals_key=\"$PORTALS_KEY\" > ./local.properties
       - name: set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
       - run: npm run verify
         working-directory: ./

@@ -4,11 +4,11 @@ import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 plugins {
     id("org.jetbrains.dokka") version "1.7.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
 buildscript {
-    val kotlinVersion = "1.9.25"
+    val kotlinVersion = "2.2.20"
     extra.apply {
         set("kotlinVersion", kotlinVersion)
     }
@@ -27,7 +27,7 @@ buildscript {
         }
 
         classpath("org.jetbrains.dokka:dokka-base:1.7.20")
-        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("com.android.tools.build:gradle:8.13.0")
         classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }

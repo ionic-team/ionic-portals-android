@@ -202,7 +202,7 @@ object PortalManager {
                 val rsaSignature = Signature.getInstance("SHA256withRSA")
                 rsaSignature.initVerify(pubKey)
                 rsaSignature.update(header)
-                rsaSignature.update(jwtDelimiter.toByte())
+                rsaSignature.update(jwtDelimiter.code.toByte())
                 rsaSignature.update(payload)
 
                 val result = rsaSignature.verify(tokenSignature)
@@ -215,7 +215,7 @@ object PortalManager {
                 registrationError()
                 false
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             registrationError()
         }
 
