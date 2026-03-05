@@ -5,11 +5,12 @@ import com.android.build.api.variant.BuildConfigField
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "io.ionic.portals.composetestapp"
-    compileSdk = 35
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
@@ -18,7 +19,7 @@ android {
     defaultConfig {
         applicationId = "io.ionic.portals.composetestapp"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -35,17 +36,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
     }
     packaging {
         resources {
@@ -56,7 +54,7 @@ android {
 
 androidComponents {
     onVariants {
-        it.buildConfigFields.put("PORTALS_KEY",
+        it.buildConfigFields?.put("PORTALS_KEY",
             BuildConfigField("String", getPortalsKey(), "portals registration key")
         )
     }

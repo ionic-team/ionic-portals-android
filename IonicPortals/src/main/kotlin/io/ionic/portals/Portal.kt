@@ -1,9 +1,17 @@
 package io.ionic.portals
 
 import android.content.Context
+import android.util.Log
+import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
+import io.ionic.liveupdates.data.model.FailResult
+import io.ionic.liveupdatesprovider.LiveUpdatesError
+import io.ionic.liveupdatesprovider.SyncCallback
+import io.ionic.liveupdatesprovider.models.SyncResult
+import io.ionic.liveupdatesprovider.LiveUpdatesManager as LiveUpdatesManagerProvider
+
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -84,6 +92,11 @@ class Portal(val name: String) {
                 }
             }
         }
+
+    /**
+     * A LiveUpdate manager, if live updates is being used.
+     */
+    var liveUpdatesManager: LiveUpdatesManagerProvider? = null
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
@@ -309,6 +322,7 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
+    private var liveUpdatesManager: LiveUpdatesManagerProvider? = null
     private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
@@ -562,6 +576,44 @@ class PortalBuilder(val name: String) {
     }
 
     /**
+     * Set a custom [LiveUpdateManager] instance to be used with the Portal.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * val liveUpdateManager = LiveUpdateManager()
+     * builder = builder.setLiveUpdateManager(liveUpdateManager)
+     * ```
+     *
+     * Example usage (java):
+     * ```java
+     * LiveUpdateManager liveUpdateManager = new LiveUpdateManager();
+     * builder = builder.setLiveUpdateManager(liveUpdateManager);
+     * ```
+     *
+     * @param liveUpdateManager a custom LiveUpdateManager instance
+     * @return the instance of the PortalBuilder with the LiveUpdateManager set
+     */
+    @JvmOverloads
+    fun setLiveUpdateManager(context: Context, liveUpdatesManager: LiveUpdatesManagerProvider, updateOnAppLoad: Boolean = true): PortalBuilder {
+        this.liveUpdatesManager = liveUpdatesManager
+        if (updateOnAppLoad) {
+            liveUpdatesManager.sync(
+                callback = object : SyncCallback {
+                    override fun onComplete(result: SyncResult) {
+                        Log.d("TestApplication", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${result.latestAppDirectory}")
+                    }
+
+                    override fun onError(error: LiveUpdatesError.SyncFailed) {
+                        Log.e("TestApplication", "Live Update sync failed: ${error.message}")
+                    }
+                }
+
+            )
+        }
+        return this
+    }
+
+    /**
      * Set development mode on the Portal which will look for a server URL set by the Portals CLI.
      * This is set to true by default but can be turned off manually if desired.
      *
@@ -598,6 +650,7 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
+        portal.liveUpdatesManager = this.liveUpdatesManager
         portal.devMode = this.devMode
         onCreate(portal)
         return portal

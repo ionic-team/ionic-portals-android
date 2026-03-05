@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "io.ionic.portals.testapp"
-    compileSdk = 35
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "io.ionic.portals.testapp"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -33,22 +33,24 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
     }
 }
 
 androidComponents {
     onVariants {
-        it.buildConfigFields.put("PORTALS_KEY", BuildConfigField("String", getPortalsKey(), "portals registration key"))
+        it.buildConfigFields?.put("PORTALS_KEY", BuildConfigField("String", getPortalsKey(), "portals registration key"))
     }
 }
 
 dependencies {
+    implementation("io.ionic:live-updates-provider:LOCAL-SNAPSHOT")
+
     implementation(project(":IonicPortals"))
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
