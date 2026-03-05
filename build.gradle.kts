@@ -40,14 +40,6 @@ allprojects {
     }
 
     apply(plugin = "org.jetbrains.dokka")
-
-    extensions.configure<org.jetbrains.dokka.gradle.DokkaExtension> {
-        pluginsConfiguration {
-            html {
-                footerMessage.set("Created by Ionic")
-            }
-        }
-    }
 }
 
 // register Clean task
