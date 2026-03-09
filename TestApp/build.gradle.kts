@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.konan.properties.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import com.android.build.api.variant.BuildConfigField
 
@@ -9,7 +10,7 @@ plugins {
 
 android {
     namespace = "io.ionic.portals.testapp"
-    compileSdk = 35
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
@@ -18,7 +19,7 @@ android {
     defaultConfig {
         applicationId = "io.ionic.portals.testapp"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -33,18 +34,20 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+}
 
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 
 androidComponents {
     onVariants {
-        it.buildConfigFields.put("PORTALS_KEY", BuildConfigField("String", getPortalsKey(), "portals registration key"))
+        it.buildConfigFields?.put("PORTALS_KEY", BuildConfigField("String", getPortalsKey(), "portals registration key"))
     }
 }
 
@@ -67,5 +70,12 @@ fun getPortalsKey(): String {
     val propFile = rootProject.file("local.properties")
     val properties = Properties()
     properties.load(FileInputStream(propFile))
-    return properties.getProperty("portals_key") ?: ""
+    val raw = properties.getProperty("portals_key") ?: ""
+    val normalized = if (raw.length >= 2 && raw.first() == '"' && raw.last() == '"') {
+        raw.substring(1, raw.length - 1)
+    } else {
+        raw
+    }
+    val escaped = normalized.replace("\\", "\\\\").replace("\"", "\\\"")
+    return "\"$escaped\""
 }

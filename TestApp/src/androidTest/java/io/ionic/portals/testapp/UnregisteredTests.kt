@@ -1,12 +1,12 @@
 package io.ionic.portals.testapp
 
-import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.ionic.portals.PortalManager
 import org.junit.Before
@@ -21,17 +21,12 @@ class UnregisteredTests {
 
     @Before
     fun setUp() {
-        scenario = ActivityScenario.launch(MainActivity::class.java).onActivity { activity ->
-            activity.sendBroadcast(
-                Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            )
-        };
+        scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
     @Test
     fun when_portals_is_not_registered__display_unregistered_view() {
-        // Dismiss the invalid key dialog when it is displayed
-        onView(withText("OK")).perform(click())
+        onView(withText("OK")).inRoot(isDialog()).perform(click())
 
         // Verify that the unregistered view is displayed
         onView(withText(io.ionic.portals.R.string.unregistered_text)).check(matches(isDisplayed()))
@@ -39,8 +34,9 @@ class UnregisteredTests {
 
     @Test
     fun when_portals_is_registered_with_bad_key__display_error_dialog() {
-        // Recreate the activity to trigger the dialog
-        onView(withText(io.ionic.portals.R.string.invalid_portals_key)).check(matches(isDisplayed()))
+        onView(withText(io.ionic.portals.R.string.invalid_portals_key))
+            .inRoot(isDialog())
+            .check(matches(isDisplayed()))
     }
 
     companion object {

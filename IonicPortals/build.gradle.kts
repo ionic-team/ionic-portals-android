@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.library")
     id("maven-publish")
@@ -10,10 +12,10 @@ if (System.getenv("PORTALS_PUBLISH") == "true") {
 
 android {
     namespace = "io.ionic.portals"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -33,18 +35,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     publishing {
         singleVariant("release")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:[7.0.0,7.1.0)")
+    api("com.capacitorjs:core:[8.0.0,9.0.0)")
     compileOnly("io.ionic:liveupdates:0.5.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

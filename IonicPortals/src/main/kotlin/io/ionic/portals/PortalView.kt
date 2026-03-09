@@ -193,7 +193,6 @@ class PortalView : FrameLayout {
                 portalFragment?.onInflate(context, attributeSet, null)
             }
 
-            val handler = Handler()
             val runnable = Runnable {
                 val thisView = findViewById<PortalView>(id)
                 if(thisView != null) {
@@ -206,7 +205,7 @@ class PortalView : FrameLayout {
                 }
             }
 
-            handler.post(runnable)
+            post(runnable)
         }
     }
 

@@ -54,7 +54,7 @@ Ionic Portals is a solution that lets you add web-based experiences to your nati
 The test projects within the repository will only work with a valid Portals key. Add the following new line to the `local.properties` file in the project root and enter your Portals key.
 
 ```
-portals_key=""
+portals_key=YOUR_PORTALS_KEY
 ```
 
 Note: This file is in the `.gitignore` and is not committed to repos by default.
