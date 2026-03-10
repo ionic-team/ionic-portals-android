@@ -1,10 +1,10 @@
 plugins {
     id("org.jetbrains.dokka") version "2.0.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.20"
 }
 
 buildscript {
-    val kotlinVersion = "2.2.20"
+    val kotlinVersion = "2.1.20"
     extra.apply {
         set("kotlinVersion", kotlinVersion)
     }
