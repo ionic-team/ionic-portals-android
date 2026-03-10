@@ -23,8 +23,8 @@ jobs:
       - name: Make local props
         run: |
           cat << EOF > "local.properties"
-          ossrhUsername=${{ secrets.ANDROID_OSSRH_USERNAME }}
-          ossrhPassword=${{ secrets.ANDROID_OSSRH_PASSWORD }}
+          centralUsername=${{ secrets.ANDROID_CENTRAL_USERNAME }}
+          centralPassword=${{ secrets.ANDROID_CENTRAL_PASSWORD }}
           sonatypeStagingProfileId=${{ secrets.ANDROID_SONATYPE_STAGING_PROFILE_ID }}
           signing.keyId=${{ secrets.ANDROID_SIGNING_KEY_ID }}
           signing.password=${{ secrets.ANDROID_SIGNING_PASSWORD }}
@@ -42,8 +42,8 @@ jobs:
       - name: Run publish script
         working-directory: ./scripts
         env:
-          ANDROID_OSSRH_USERNAME: ${{ secrets.ANDROID_OSSRH_USERNAME }}
-          ANDROID_OSSRH_PASSWORD: ${{ secrets.ANDROID_OSSRH_PASSWORD }}
+          ANDROID_CENTRAL_USERNAME: ${{ secrets.ANDROID_CENTRAL_USERNAME }}
+          ANDROID_CENTRAL_PASSWORD: ${{ secrets.ANDROID_CENTRAL_PASSWORD }}
           ANDROID_SIGNING_KEY_ID: ${{ secrets.ANDROID_SIGNING_KEY_ID }}
           ANDROID_SIGNING_PASSWORD: ${{ secrets.ANDROID_SIGNING_PASSWORD }}
           ANDROID_SIGNING_KEY: ${{ secrets.ANDROID_SIGNING_KEY }}
