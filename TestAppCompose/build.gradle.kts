@@ -37,11 +37,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -92,7 +92,6 @@ fun getPortalsKey(): String {
     val propFile = rootProject.file("local.properties")
     val properties = Properties()
     properties.load(FileInputStream(propFile))
-<<<<<<< HEAD
     val raw = properties.getProperty("portals_key") ?: ""
     val normalized = if (raw.length >= 2 && raw.first() == '"' && raw.last() == '"') {
         raw.substring(1, raw.length - 1)
@@ -101,7 +100,4 @@ fun getPortalsKey(): String {
     }
     val escaped = normalized.replace("\\", "\\\\").replace("\"", "\\\"")
     return "\"$escaped\""
-=======
-    return properties.getProperty("portals_key") ?: ""
->>>>>>> e9d0f1b (feat: add third-party LiveUpdates provider support and upgrade dependencies)
 }
