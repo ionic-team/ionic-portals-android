@@ -271,7 +271,7 @@ open class PortalFragment : Fragment {
      */
     fun reload() {
         if(portal?.liveUpdateConfig != null) {
-            val latestLiveUpdateFiles = portal?.liveUpdatesManager?.latestAppDirectory() ?: LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+            val latestLiveUpdateFiles = portal?.liveUpdatesManager?.latestAppDirectory ?: LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
             if (latestLiveUpdateFiles != null) {
                 if (liveUpdateFiles == null || liveUpdateFiles!!.path != latestLiveUpdateFiles.path) {
                     liveUpdateFiles = latestLiveUpdateFiles
@@ -326,7 +326,7 @@ open class PortalFragment : Fragment {
                         .addWebViewListeners(webViewListeners)
 
                     if (portal?.liveUpdateConfig != null) {
-                        liveUpdateFiles = portal?.liveUpdatesManager?.latestAppDirectory() ?: LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+                        liveUpdateFiles = portal?.liveUpdatesManager?.latestAppDirectory ?: LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
                         bridgeBuilder = if (liveUpdateFiles != null) {
                             if (config == null) {
                                 val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")

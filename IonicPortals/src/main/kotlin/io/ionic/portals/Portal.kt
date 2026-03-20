@@ -2,15 +2,13 @@ package io.ionic.portals
 
 import android.content.Context
 import android.util.Log
-import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
-import io.ionic.liveupdates.data.model.FailResult
-import io.ionic.liveupdatesprovider.LiveUpdatesError
-import io.ionic.liveupdatesprovider.SyncCallback
-import io.ionic.liveupdatesprovider.models.SyncResult
-import io.ionic.liveupdatesprovider.LiveUpdatesManager as LiveUpdatesManagerProvider
+import io.ionic.liveupdateprovider.LiveUpdateError
+import io.ionic.liveupdateprovider.SyncCallback
+import io.ionic.liveupdateprovider.SyncResult
+import io.ionic.liveupdateprovider.LiveUpdateManager as ProviderLiveUpdateManager
 
 
 /**
@@ -96,7 +94,7 @@ class Portal(val name: String) {
     /**
      * A LiveUpdate manager, if live updates is being used.
      */
-    var liveUpdatesManager: LiveUpdatesManagerProvider? = null
+    var liveUpdatesManager: ProviderLiveUpdateManager? = null
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
@@ -322,7 +320,7 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
-    private var liveUpdatesManager: LiveUpdatesManagerProvider? = null
+    private var liveUpdatesManager: ProviderLiveUpdateManager? = null
     private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
@@ -569,9 +567,27 @@ class PortalBuilder(val name: String) {
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
         LiveUpdateManager.addLiveUpdateInstance(context, liveUpdateConfig)
-        if (updateOnAppLoad) {
+
+        if (!updateOnAppLoad) return this
+
+        // old way if no manager defined
+        if (this.liveUpdatesManager == null) {
             LiveUpdateManager.sync(context, arrayOf(liveUpdateConfig.appId))
+            return this
         }
+
+        this.liveUpdatesManager!!.sync(
+            callback = object : SyncCallback {
+                override fun onComplete(result: SyncResult) {
+                    Log.d("PortalBuilder", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${liveUpdatesManager?.latestAppDirectory}")
+                }
+
+                override fun onError(error: LiveUpdateError.SyncFailed) {
+                    Log.e("PortalBuilder", "Live Update sync failed: ${error.message}")
+                }
+            }
+
+        )
         return this
     }
 
@@ -594,16 +610,16 @@ class PortalBuilder(val name: String) {
      * @return the instance of the PortalBuilder with the LiveUpdateManager set
      */
     @JvmOverloads
-    fun setLiveUpdateManager(context: Context, liveUpdatesManager: LiveUpdatesManagerProvider, updateOnAppLoad: Boolean = true): PortalBuilder {
+    fun setLiveUpdateManager(context: Context, liveUpdatesManager: ProviderLiveUpdateManager, updateOnAppLoad: Boolean = true): PortalBuilder {
         this.liveUpdatesManager = liveUpdatesManager
         if (updateOnAppLoad) {
-            liveUpdatesManager.sync(
+            this.liveUpdatesManager?.sync(
                 callback = object : SyncCallback {
                     override fun onComplete(result: SyncResult) {
-                        Log.d("TestApplication", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${result.latestAppDirectory}")
+                        Log.d("TestApplication", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${liveUpdatesManager.latestAppDirectory}")
                     }
 
-                    override fun onError(error: LiveUpdatesError.SyncFailed) {
+                    override fun onError(error: LiveUpdateError.SyncFailed) {
                         Log.e("TestApplication", "Live Update sync failed: ${error.message}")
                     }
                 }

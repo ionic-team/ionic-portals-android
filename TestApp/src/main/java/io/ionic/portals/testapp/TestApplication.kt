@@ -4,30 +4,29 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 
-import io.ionic.liveupdatesprovider.LiveUpdatesError.InvalidConfiguration
-import io.ionic.liveupdatesprovider.LiveUpdatesError.SyncFailed
-import io.ionic.liveupdatesprovider.LiveUpdatesManager
-import io.ionic.liveupdatesprovider.LiveUpdatesProvider
-import io.ionic.liveupdatesprovider.LiveUpdatesRegistry
-import io.ionic.liveupdatesprovider.SyncCallback
-import io.ionic.liveupdatesprovider.models.ProviderConfig
-import io.ionic.liveupdatesprovider.models.SyncResult
+import io.ionic.liveupdateprovider.LiveUpdateError.InvalidConfiguration
+import io.ionic.liveupdateprovider.LiveUpdateError.SyncFailed
+import io.ionic.liveupdateprovider.LiveUpdateManager
+import io.ionic.liveupdateprovider.LiveUpdateProvider
+import io.ionic.liveupdateprovider.LiveUpdateProviderRegistry
+import io.ionic.liveupdateprovider.SyncCallback
+import io.ionic.liveupdateprovider.SyncResult
 import io.ionic.portals.PortalManager
 import java.io.File
 
 
 /**
- * Mock implementation of LiveUpdatesManager for testing purposes.
+ * Mock implementation of LiveUpdateManager for testing purposes.
  * Allows testing config parsing and sync behavior without actual network requests.
  */
-internal class MockLiveUpdatesManager(
+internal class MockLiveUpdateManager(
     private val appId: String?,
     private val channel: String?,
     private val latestAppDir: File?,
     private val shouldFail: Boolean,
     private val failureDetails: String,
     private val didUpdate: Boolean
-) : LiveUpdatesManager {
+) : LiveUpdateManager {
     override fun sync(callback: SyncCallback?) {
         // Simulate async behavior with a small delay
         Thread(Runnable {
@@ -38,43 +37,40 @@ internal class MockLiveUpdatesManager(
             }
             if (this.shouldFail) {
                 val error = SyncFailed(this.failureDetails, null)
-                if (callback != null) {
-                    callback.onError(error)
-                }
+                callback?.onError(error)
             } else {
-                val result = SyncResult(this.didUpdate, this.latestAppDir)
-                if (callback != null) {
-                    callback.onComplete(result)
+                val result = object : SyncResult {
+                    override val didUpdate: Boolean = this@MockLiveUpdateManager.didUpdate
                 }
+                callback?.onComplete(result)
             }
         }).start()
     }
 
-    override fun latestAppDirectory(): File? {
-        return this.latestAppDir
-    }
+    override val latestAppDirectory: File?
+        get() = this.latestAppDir
 }
 
 
-class MockLiveUpdatesProvider(override val id: String) : LiveUpdatesProvider {
+class MockLiveUpdateProvider(override val id: String) : LiveUpdateProvider {
     @Throws(InvalidConfiguration::class)
-    override fun createManager(context: Context, config: ProviderConfig): LiveUpdatesManager {
+    override fun createManager(context: Context, config: Map<String, Any>?): LiveUpdateManager {
 
-        val data: MutableMap<String?, Any?> = config.data as MutableMap<String?, Any?>
+        val data: Map<String, Any> = config ?: emptyMap()
         var shouldFail = false
-        val shouldFailObj = data.get("shouldFail")
+        val shouldFailObj = data["shouldFail"]
         if (shouldFailObj is Boolean) {
             shouldFail = shouldFailObj
         }
 
         var failureDetails = "Mock sync failed"
-        val failureDetailsObj = data.get("failureDetails")
+        val failureDetailsObj = data["failureDetails"]
         if (failureDetailsObj is String) {
             failureDetails = failureDetailsObj
         }
 
         var didUpdate = false
-        val didUpdateObj = data.get("didUpdate")
+        val didUpdateObj = data["didUpdate"]
         if (didUpdateObj is Boolean) {
             didUpdate = didUpdateObj
         }
@@ -85,9 +81,9 @@ class MockLiveUpdatesProvider(override val id: String) : LiveUpdatesProvider {
             "/data/user/0/io.ionic.portals.ecommercewebapp/files/ionic_apps/3fde24f8/5966bde5-da2e-4b40-8487-2b0fef7c458b"
         val latestAppDir = File(filePath)
 
-        return MockLiveUpdatesManager(
-            data.get("appId") as? String,
-            data.get("channel") as? String,
+        return MockLiveUpdateManager(
+            data["appId"] as? String,
+            data["channel"] as? String,
             latestAppDir,  // latestAppDir
             shouldFail,
             failureDetails,
@@ -109,35 +105,33 @@ class TestApplication: Application() {
 
 
         // Register provider
-        LiveUpdatesRegistry.register(MockLiveUpdatesProvider("mock"))
+        LiveUpdateProviderRegistry.register(MockLiveUpdateProvider("mock"))
 
         // Resolve the provider where you want in the app
-        val provider = LiveUpdatesRegistry.resolve("mock")
+        val provider = LiveUpdateProviderRegistry.resolve("mock")
         if (provider == null) {
-            Log.e("TestApplication", "Failed to register MockLiveUpdatesProvider")
+            Log.e("TestApplication", "Failed to register MockLiveUpdateProvider")
         } else {
-            Log.d("TestApplication", "Successfully registered MockLiveUpdatesProvider with ID: ${provider.id}")
+            Log.d("TestApplication", "Successfully registered MockLiveUpdateProvider with ID: ${provider.id}")
         }
 
         // create the 3rd party manager
         val manager = provider?.createManager(
             this,
-            ProviderConfig(
-                mapOf(
-                    "appId" to "testAppId",
-                    "channel" to "testChannel",
-                    "shouldFail" to false,
-                    "failureDetails" to "Simulated sync failure",
-                    "didUpdate" to true,
-                    "endpoint" to "https://cloud.provider.io",
-                    "apiKey" to "<PROVIDER_API_KEY>"
-                )
+            mapOf(
+                "appId" to "testAppId",
+                "channel" to "testChannel",
+                "shouldFail" to false,
+                "failureDetails" to "Simulated sync failure",
+                "didUpdate" to true,
+                "endpoint" to "https://cloud.provider.io",
+                "apiKey" to "<PROVIDER_API_KEY>"
             )
         )
         if (manager == null) {
-            Log.e("TestApplication", "Failed to create LiveUpdatesManager from MockLiveUpdatesProvider")
+            Log.e("TestApplication", "Failed to create LiveUpdateManager from MockLiveUpdateProvider")
         } else {
-            Log.d("TestApplication", "Successfully created LiveUpdatesManager from MockLiveUpdatesProvider")
+            Log.d("TestApplication", "Successfully created LiveUpdateManager from MockLiveUpdateProvider")
 
 
             // set the 3rd party manager
