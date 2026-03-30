@@ -52,6 +52,8 @@ androidComponents {
 }
 
 dependencies {
+    implementation("io.ionic:live-updates-provider:LOCAL-SNAPSHOT")
+
     implementation(project(":IonicPortals"))
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")

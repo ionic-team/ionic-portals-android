@@ -1,9 +1,16 @@
 package io.ionic.portals
 
 import android.content.Context
+import android.util.Log
 import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
+import io.ionic.liveupdateprovider.LiveUpdateError
+import io.ionic.liveupdateprovider.ProviderSyncCallback
+import io.ionic.liveupdateprovider.ProviderSyncResult
+import io.ionic.liveupdateprovider.LiveUpdateProviderManager
+import io.ionic.liveupdateprovider.ProviderSyncError
+
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -84,6 +91,11 @@ class Portal(val name: String) {
                 }
             }
         }
+
+    /**
+     * A LiveUpdate manager, if live updates is being used.
+     */
+    var liveUpdateManager: LiveUpdateProviderManager? = null
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
@@ -309,6 +321,7 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
+    private var liveUpdateManager: LiveUpdateProviderManager? = null
     private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
@@ -555,8 +568,64 @@ class PortalBuilder(val name: String) {
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
         LiveUpdateManager.addLiveUpdateInstance(context, liveUpdateConfig)
-        if (updateOnAppLoad) {
+
+        if (!updateOnAppLoad) return this
+
+        // old way if no manager defined
+        if (this.liveUpdateManager == null) {
             LiveUpdateManager.sync(context, arrayOf(liveUpdateConfig.appId))
+            return this
+        }
+
+        this.liveUpdateManager!!.sync(
+            callback = object : ProviderSyncCallback {
+                override fun onSuccess(result: ProviderSyncResult) {
+                    Log.d("PortalBuilder", "Live Update sync complete. Latest app dir: ${liveUpdateManager?.latestAppDirectory}")
+                }
+
+                override fun onFailure(error: ProviderSyncError) {
+                    Log.e("PortalBuilder", "Live Update sync failed: ${error.message}")
+                }
+            }
+
+        )
+        return this
+    }
+
+    /**
+     * Set a custom [LiveUpdateManager] instance to be used with the Portal.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * val liveUpdateManager = LiveUpdateManager()
+     * builder = builder.setLiveUpdateManager(liveUpdateManager)
+     * ```
+     *
+     * Example usage (java):
+     * ```java
+     * LiveUpdateManager liveUpdateManager = new LiveUpdateManager();
+     * builder = builder.setLiveUpdateManager(liveUpdateManager);
+     * ```
+     *
+     * @param liveUpdateManager a custom LiveUpdateManager instance
+     * @return the instance of the PortalBuilder with the LiveUpdateManager set
+     */
+    @JvmOverloads
+    fun setLiveUpdateManager(context: Context, liveUpdatesManager: LiveUpdateProviderManager, updateOnAppLoad: Boolean = true): PortalBuilder {
+        this.liveUpdateManager = liveUpdatesManager
+        if (updateOnAppLoad) {
+            this.liveUpdateManager?.sync(
+                callback = object : ProviderSyncCallback {
+                    override fun onSuccess(result: ProviderSyncResult) {
+                        Log.d("TestApplication", "Live Update sync complete. Latest app dir: ${liveUpdatesManager.latestAppDirectory}")
+                    }
+
+                    override fun onFailure(error: ProviderSyncError) {
+                        Log.e("TestApplication", "Live Update sync failed: ${error.message}")
+                    }
+                }
+
+            )
         }
         return this
     }
@@ -598,9 +667,9 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
+        portal.liveUpdateManager = this.liveUpdateManager
         portal.devMode = this.devMode
         onCreate(portal)
         return portal
     }
-
 }

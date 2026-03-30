@@ -35,6 +35,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
     publishing {
         singleVariant("release")
     }
@@ -51,6 +54,7 @@ dependencies {
 
     api("com.capacitorjs:core:[8.0.0,9.0.0)")
     compileOnly("io.ionic:liveupdates:0.5.5")
+    compileOnly("io.ionic:live-update-provider:LOCAL-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.core:core-ktx:1.15.0")
