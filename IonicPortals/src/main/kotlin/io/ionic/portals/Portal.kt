@@ -6,9 +6,10 @@ import com.getcapacitor.Plugin
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
 import io.ionic.liveupdateprovider.LiveUpdateError
-import io.ionic.liveupdateprovider.SyncCallback
-import io.ionic.liveupdateprovider.SyncResult
-import io.ionic.liveupdateprovider.LiveUpdateManager as ProviderLiveUpdateManager
+import io.ionic.liveupdateprovider.ProviderSyncCallback
+import io.ionic.liveupdateprovider.ProviderSyncResult
+import io.ionic.liveupdateprovider.LiveUpdateProviderManager
+import io.ionic.liveupdateprovider.ProviderSyncError
 
 
 /**
@@ -94,7 +95,7 @@ class Portal(val name: String) {
     /**
      * A LiveUpdate manager, if live updates is being used.
      */
-    var liveUpdatesManager: ProviderLiveUpdateManager? = null
+    var liveUpdateManager: LiveUpdateProviderManager? = null
 
     /**
      * Whether to run a live update sync when the portal is added to the manager.
@@ -320,7 +321,7 @@ class PortalBuilder(val name: String) {
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
     private var liveUpdateConfig: LiveUpdate? = null
-    private var liveUpdatesManager: ProviderLiveUpdateManager? = null
+    private var liveUpdateManager: LiveUpdateProviderManager? = null
     private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
@@ -571,18 +572,18 @@ class PortalBuilder(val name: String) {
         if (!updateOnAppLoad) return this
 
         // old way if no manager defined
-        if (this.liveUpdatesManager == null) {
+        if (this.liveUpdateManager == null) {
             LiveUpdateManager.sync(context, arrayOf(liveUpdateConfig.appId))
             return this
         }
 
-        this.liveUpdatesManager!!.sync(
-            callback = object : SyncCallback {
-                override fun onComplete(result: SyncResult) {
-                    Log.d("PortalBuilder", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${liveUpdatesManager?.latestAppDirectory}")
+        this.liveUpdateManager!!.sync(
+            callback = object : ProviderSyncCallback {
+                override fun onSuccess(result: ProviderSyncResult) {
+                    Log.d("PortalBuilder", "Live Update sync complete. Latest app dir: ${liveUpdateManager?.latestAppDirectory}")
                 }
 
-                override fun onError(error: LiveUpdateError.SyncFailed) {
+                override fun onFailure(error: ProviderSyncError) {
                     Log.e("PortalBuilder", "Live Update sync failed: ${error.message}")
                 }
             }
@@ -610,16 +611,16 @@ class PortalBuilder(val name: String) {
      * @return the instance of the PortalBuilder with the LiveUpdateManager set
      */
     @JvmOverloads
-    fun setLiveUpdateManager(context: Context, liveUpdatesManager: ProviderLiveUpdateManager, updateOnAppLoad: Boolean = true): PortalBuilder {
-        this.liveUpdatesManager = liveUpdatesManager
+    fun setLiveUpdateManager(context: Context, liveUpdatesManager: LiveUpdateProviderManager, updateOnAppLoad: Boolean = true): PortalBuilder {
+        this.liveUpdateManager = liveUpdatesManager
         if (updateOnAppLoad) {
-            this.liveUpdatesManager?.sync(
-                callback = object : SyncCallback {
-                    override fun onComplete(result: SyncResult) {
-                        Log.d("TestApplication", "Live Update sync complete. Did update: ${result.didUpdate}, latest app dir: ${liveUpdatesManager.latestAppDirectory}")
+            this.liveUpdateManager?.sync(
+                callback = object : ProviderSyncCallback {
+                    override fun onSuccess(result: ProviderSyncResult) {
+                        Log.d("TestApplication", "Live Update sync complete. Latest app dir: ${liveUpdatesManager.latestAppDirectory}")
                     }
 
-                    override fun onError(error: LiveUpdateError.SyncFailed) {
+                    override fun onFailure(error: ProviderSyncError) {
                         Log.e("TestApplication", "Live Update sync failed: ${error.message}")
                     }
                 }
@@ -666,10 +667,9 @@ class PortalBuilder(val name: String) {
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
         portal.liveUpdateConfig = this.liveUpdateConfig
-        portal.liveUpdatesManager = this.liveUpdatesManager
+        portal.liveUpdateManager = this.liveUpdateManager
         portal.devMode = this.devMode
         onCreate(portal)
         return portal
     }
-
 }
