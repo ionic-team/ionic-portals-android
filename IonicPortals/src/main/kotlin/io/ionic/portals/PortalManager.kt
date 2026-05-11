@@ -83,8 +83,8 @@ object PortalManager {
 
     /**
      * Removes the Portal from the Portal Manager. The Portal will be returned if it was present. If not, null is returned.
-     * Note: if the Portal uses Live Updates and registered an instance on creation, the Live Update instance for the app
-     * is not removed.
+     * Note: if the Portal uses Ionic Live Updates and registered an instance on creation, the Ionic
+     * Live Updates instance for the app is not removed.
      *
      * @param name the name of the Portal to remove
      */
