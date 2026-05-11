@@ -33,6 +33,10 @@ See our docs to [get started with Portals](https://ionic.io/docs/portals/getting
 
 The Ionic Portals library for Android and iOS requires a license key to use. Once you have integrated Portals into your project, login to your ionic account to get a key. See our doc on [how to register and get your Portals license key](https://ionic.io/docs/portals/how-to/get-a-product-key) and refer to the [Android](https://ionic.io/docs/portals/getting-started/android) or [iOS](https://ionic.io/docs/portals/getting-started/iOS) getting started guides to see where to add your key.
 
+## Live Updates
+
+Portals can load updated web assets from Ionic Live Updates or from an external live update provider. See [LiveUpdates.md](./LiveUpdates.md) for setup examples and migration notes.
+
 ## FAQ
 
 ### What is the pricing for Portals use?
