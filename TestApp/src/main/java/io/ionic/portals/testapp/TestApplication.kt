@@ -8,7 +8,6 @@ class TestApplication: Application() {
     override fun onCreate() {
         super.onCreate()
 
-        PortalManager.register(BuildConfig.PORTALS_KEY)
         PortalManager.newPortal("testportal").create()
     }
 }

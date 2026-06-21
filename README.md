@@ -29,9 +29,9 @@ Ionic Portals is a supercharged native Web View component for iOS and Android th
 
 See our docs to [get started with Portals](https://ionic.io/docs/portals/getting-started/guide).
 
-## Registration
+## License
 
-The Ionic Portals library for Android and iOS requires a license key to use. Once you have integrated Portals into your project, login to your ionic account to get a key. See our doc on [how to register and get your Portals license key](https://ionic.io/docs/portals/how-to/get-a-product-key) and refer to the [Android](https://ionic.io/docs/portals/getting-started/android) or [iOS](https://ionic.io/docs/portals/getting-started/iOS) getting started guides to see where to add your key.
+Use of Ionic Portals requires a valid and active commercial agreement with Ionic.
 
 ## FAQ
 
@@ -48,13 +48,3 @@ See our [license](https://github.com/ionic-team/ionic-portals/blob/main/LICENSE.
 Ionic Portals is a solution that lets you add web-based experiences to your native mobile apps. Portals uses [Capacitor](https://capacitorjs.com) as a bridge between the native code and the web code to allow for cross-communication between the two layers. Because Portals uses Capacitor under the hood, you are able to use any existing [Capacitor Plugins](https://capacitorjs.com/docs/plugins) while continuing to use your existing native workflow.
 
 [Ionic Framework](https://ionicframework.com/) is the open-source mobile app development framework that makes it easy to build top quality native and progressive web apps with web technologies. Your web experiences can be developed with Ionic, but it is not necessary to use Portals.
-
-## Testing
-
-The test projects within the repository will only work with a valid Portals key. Add the following new line to the `local.properties` file in the project root and enter your Portals key.
-
-```
-portals_key=YOUR_PORTALS_KEY
-```
-
-Note: This file is in the `.gitignore` and is not committed to repos by default.

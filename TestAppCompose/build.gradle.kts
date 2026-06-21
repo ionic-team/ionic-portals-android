@@ -1,7 +1,4 @@
-import org.jetbrains.kotlin.konan.properties.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.FileInputStream
-import com.android.build.api.variant.BuildConfigField
 
 plugins {
     id("com.android.application")
@@ -12,10 +9,6 @@ plugins {
 android {
     namespace = "io.ionic.portals.composetestapp"
     compileSdk = 36
-
-    buildFeatures {
-        buildConfig = true
-    }
 
     defaultConfig {
         applicationId = "io.ionic.portals.composetestapp"
@@ -33,7 +26,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -56,14 +48,6 @@ kotlin {
     }
 }
 
-androidComponents {
-    onVariants {
-        it.buildConfigFields?.put("PORTALS_KEY",
-            BuildConfigField("String", getPortalsKey(), "portals registration key")
-        )
-    }
-}
-
 dependencies {
     implementation(project(":IonicPortals"))
     implementation("androidx.core:core-ktx:1.12.0")
@@ -83,18 +67,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-}
-
-fun getPortalsKey(): String {
-    val propFile = rootProject.file("local.properties")
-    val properties = Properties()
-    properties.load(FileInputStream(propFile))
-    val raw = properties.getProperty("portals_key") ?: ""
-    val normalized = if (raw.length >= 2 && raw.first() == '"' && raw.last() == '"') {
-        raw.substring(1, raw.length - 1)
-    } else {
-        raw
-    }
-    val escaped = normalized.replace("\\", "\\\\").replace("\"", "\\\"")
-    return "\"$escaped\""
 }
