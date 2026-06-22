@@ -3,6 +3,7 @@ name: Deploy docs PR preview
 on:
   pull_request:
     paths:
+    - '.github/workflows/docs-preview.yml'
     - 'IonicPortals/src/main/**'
 
 permissions:
