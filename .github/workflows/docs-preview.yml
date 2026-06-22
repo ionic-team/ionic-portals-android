@@ -12,6 +12,7 @@ permissions:
 
 env:
   SLUG: portals-android-api-ref-${{ github.event.number }}-${{ github.run_id }}
+  DOCS_PATH: portals-android-api-ref
 
 jobs:
   deploy:
@@ -19,7 +20,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: preview-${{ github.event.number }}
-      url: https://${{ env.SLUG }}.ionicpreview.com
+      url: https://${{ env.SLUG }}.ionicpreview.com/docs/${{ env.DOCS_PATH }}/
     steps:
       - uses: actions/checkout@v7
       - name: set up JDK 17

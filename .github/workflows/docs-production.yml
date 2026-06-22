@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: production
-      url: https://ionic.io/docs/${{ env.SLUG }}
+      url: https://ionic.io/docs/${{ env.SLUG }}/
     steps:
       - uses: actions/checkout@v7
       - name: set up JDK 17
