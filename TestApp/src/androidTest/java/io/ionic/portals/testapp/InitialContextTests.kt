@@ -11,10 +11,8 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.ionic.portals.PortalManager
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -43,13 +41,5 @@ class InitialContextTests {
     fun verify_initial_context_is_present__when_portal_loads() {
         val script = script("return window.AndroidInitialContext.initialContext();", castOrDie(String::class.java))
         onWebView().check(webMatches(script, containsString("testportal")))
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeClass
-        fun classSetUp() {
-            PortalManager.register(BuildConfig.PORTALS_KEY)
-        }
     }
 }

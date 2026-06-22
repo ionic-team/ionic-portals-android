@@ -1,7 +1,6 @@
 package io.ionic.portals
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.os.Bundle
@@ -82,8 +81,7 @@ open class PortalFragment : Fragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val layout = if(PortalManager.isRegistered()) R.layout.fragment_portal else R.layout.fragment_unregistered
-        return inflater.inflate(layout, container, false)
+        return inflater.inflate(R.layout.fragment_portal, container, false)
     }
 
     /**
@@ -294,59 +292,48 @@ open class PortalFragment : Fragment {
      * Load the WebView and create the Bridge
      */
     private fun load(savedInstanceState: Bundle?) {
-        if (PortalManager.isRegistered()) {
-            if (bridge == null) {
-                Logger.debug("Loading Bridge with Portal")
+        if (bridge == null) {
+            Logger.debug("Loading Bridge with Portal")
 
-                val existingPortalName = savedInstanceState?.getString(PORTAL_NAME, null)
-                if (existingPortalName != null && portal == null) {
-                    try {
-                        portal = PortalManager.getPortal(existingPortalName)
-                    } catch (e: Exception) {
-                        Logger.warn("Attempted to reload PortalFragment from App restore but portal not found.")
-                        Logger.warn("No portal named $existingPortalName found in PortalManager to use.")
-                        Logger.warn("Portal reload is unsuccessful. This is likely okay and safe to ignore if your app is returning from a force quit state.")
-                    }
+            val existingPortalName = savedInstanceState?.getString(PORTAL_NAME, null)
+            if (existingPortalName != null && portal == null) {
+                try {
+                    portal = PortalManager.getPortal(existingPortalName)
+                } catch (e: Exception) {
+                    Logger.warn("Attempted to reload PortalFragment from App restore but portal not found.")
+                    Logger.warn("No portal named $existingPortalName found in PortalManager to use.")
+                    Logger.warn("Portal reload is unsuccessful. This is likely okay and safe to ignore if your app is returning from a force quit state.")
+                }
+            }
+
+            if (portal != null) {
+                val startDir: String = portal?.startDir!!
+                initialPlugins.addAll(portal?.plugins!!)
+                initialPluginInstances.addAll(portal?.pluginInstances!!)
+
+                var configToUse : CapConfig? = null
+                if(config != null) {
+                    // If application is provided a programmatic config, opt to use that above all other options
+                    configToUse = config
                 }
 
-                if (portal != null) {
-                    val startDir: String = portal?.startDir!!
-                    initialPlugins.addAll(portal?.plugins!!)
-                    initialPluginInstances.addAll(portal?.pluginInstances!!)
+                var bridgeBuilder = Bridge.Builder(this)
+                    .setInstanceState(savedInstanceState)
+                    .setPlugins(initialPlugins)
+                    .addPluginInstances(initialPluginInstances)
+                    .addWebViewListeners(webViewListeners)
 
-                    var configToUse : CapConfig? = null
-                    if(config != null) {
-                        // If application is provided a programmatic config, opt to use that above all other options
-                        configToUse = config
-                    }
-
-                    var bridgeBuilder = Bridge.Builder(this)
-                        .setInstanceState(savedInstanceState)
-                        .setPlugins(initialPlugins)
-                        .addPluginInstances(initialPluginInstances)
-                        .addWebViewListeners(webViewListeners)
-
-                    if (portal?.liveUpdateConfig != null) {
-                        liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
-                        bridgeBuilder = if (liveUpdateFiles != null) {
-                            if (config == null) {
-                                val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
-                                if(configFile.exists()) {
-                                    configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
-                                }
+                if (portal?.liveUpdateConfig != null) {
+                    liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+                    bridgeBuilder = if (liveUpdateFiles != null) {
+                        if (config == null) {
+                            val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
+                            if(configFile.exists()) {
+                                configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
                             }
-
-                            bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
-                        } else {
-                            if (config == null) {
-                                try {
-                                    val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
-                                    configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
-                                } catch (_: Exception) {}
-                            }
-
-                            bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                         }
+
+                        bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
                     } else {
                         if (config == null) {
                             try {
@@ -355,61 +342,61 @@ open class PortalFragment : Fragment {
                             } catch (_: Exception) {}
                         }
 
-                        bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
+                        bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
+                    }
+                } else {
+                    if (config == null) {
+                        try {
+                            val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                            configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
+                        } catch (_: Exception) {}
                     }
 
-                    portal?.assetMaps?.let {
-                        if (it.isNotEmpty()) {
-                            bridgeBuilder = bridgeBuilder.setRouteProcessor(PortalsRouteProcessor(requireContext(),it))
-                        }
-                    }
-
-                    if(configToUse == null) {
-                        configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
-                    }
-
-                    // Dev mode
-                    val isDebuggable = 0 != requireContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
-                    if (isDebuggable && portal?.devMode == true) {
-                        val devConfig = DevConfiguration.getCapacitorConfig(requireContext(), portal?.name!!)
-                        if (devConfig != null) {
-                            configToUse = devConfig
-                        } else {
-                            Logger.debug("No dev config set by Portals CLI for portal ${portal?.name}, loading the non-debug config")
-                        }
-
-                        val devUrl = DevConfiguration.getServerUrl(requireContext(), portal?.name!!)
-                        if (devUrl != null && configToUse != null) {
-                            val devModeField: Field = configToUse.javaClass.getDeclaredField("serverUrl")
-                            devModeField.isAccessible = true
-                            devModeField.set(configToUse, devUrl)
-                        } else {
-                            val noDevUrlMsg = "No dev URL set by Portals CLI for portal ${portal?.name}"
-                            if (devConfig != null && devConfig.serverUrl != null) {
-                                Logger.debug("$noDevUrlMsg, using URL from dev config")
-                            } else {
-                                Logger.debug("$noDevUrlMsg, loading Portal from assets")
-                            }
-                        }
-                    }
-
-                    bridgeBuilder = bridgeBuilder.setConfig(configToUse)
-                    bridge = bridgeBuilder.create()
-
-                    setupPortalsJS()
-                    keepRunning = bridge?.shouldKeepRunning()!!
-
-                    onBridgeAvailable?.let { onBridgeAvailable -> bridge?.let { bridge -> onBridgeAvailable(bridge)} }
+                    bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                 }
-            }
-        } else if (PortalManager.isRegisteredError()) {
-            if(activity != null) {
-                val alert = AlertDialog.Builder(activity)
-                alert.setMessage(getString(R.string.invalid_portals_key))
-                alert.setPositiveButton("OK") { dialog, _ ->
-                    dialog.dismiss()
+
+                portal?.assetMaps?.let {
+                    if (it.isNotEmpty()) {
+                        bridgeBuilder = bridgeBuilder.setRouteProcessor(PortalsRouteProcessor(requireContext(),it))
+                    }
                 }
-                alert.show()
+
+                if(configToUse == null) {
+                    configToUse = CapConfig.Builder(requireContext()).setInitialFocus(false).create()
+                }
+
+                // Dev mode
+                val isDebuggable = 0 != requireContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                if (isDebuggable && portal?.devMode == true) {
+                    val devConfig = DevConfiguration.getCapacitorConfig(requireContext(), portal?.name!!)
+                    if (devConfig != null) {
+                        configToUse = devConfig
+                    } else {
+                        Logger.debug("No dev config set by Portals CLI for portal ${portal?.name}, loading the non-debug config")
+                    }
+
+                    val devUrl = DevConfiguration.getServerUrl(requireContext(), portal?.name!!)
+                    if (devUrl != null && configToUse != null) {
+                        val devModeField: Field = configToUse.javaClass.getDeclaredField("serverUrl")
+                        devModeField.isAccessible = true
+                        devModeField.set(configToUse, devUrl)
+                    } else {
+                        val noDevUrlMsg = "No dev URL set by Portals CLI for portal ${portal?.name}"
+                        if (devConfig != null && devConfig.serverUrl != null) {
+                            Logger.debug("$noDevUrlMsg, using URL from dev config")
+                        } else {
+                            Logger.debug("$noDevUrlMsg, loading Portal from assets")
+                        }
+                    }
+                }
+
+                bridgeBuilder = bridgeBuilder.setConfig(configToUse)
+                bridge = bridgeBuilder.create()
+
+                setupPortalsJS()
+                keepRunning = bridge?.shouldKeepRunning()!!
+
+                onBridgeAvailable?.let { onBridgeAvailable -> bridge?.let { bridge -> onBridgeAvailable(bridge)} }
             }
         }
     }

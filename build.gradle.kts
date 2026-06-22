@@ -41,8 +41,3 @@ allprojects {
 
     apply(plugin = "org.jetbrains.dokka")
 }
-
-// register Clean task
-tasks.register("clean").configure {
-    delete("build")
-}
