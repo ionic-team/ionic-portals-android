@@ -12,7 +12,6 @@ import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.getcapacitor.*
-import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
@@ -265,11 +264,11 @@ open class PortalFragment : Fragment {
 
     /**
      * Reloads the Portal.
-     * If Live Updates is used and the web content was updated, the new content will be loaded.
+     * If a live update source is configured and the web content was updated, the new content will be loaded.
      */
     fun reload() {
-        if(portal?.liveUpdateConfig != null) {
-            val latestLiveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+        if(portal?.liveUpdateSource != null) {
+            val latestLiveUpdateFiles = portal?.latestAppDirectory(requireContext())
             if (latestLiveUpdateFiles != null) {
                 if (liveUpdateFiles == null || liveUpdateFiles!!.path != latestLiveUpdateFiles.path) {
                     liveUpdateFiles = latestLiveUpdateFiles
@@ -323,8 +322,8 @@ open class PortalFragment : Fragment {
                     .addPluginInstances(initialPluginInstances)
                     .addWebViewListeners(webViewListeners)
 
-                if (portal?.liveUpdateConfig != null) {
-                    liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+                if (portal?.liveUpdateSource != null) {
+                    liveUpdateFiles = portal?.latestAppDirectory(requireContext())
                     bridgeBuilder = if (liveUpdateFiles != null) {
                         if (config == null) {
                             val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")

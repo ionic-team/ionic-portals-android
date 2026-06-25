@@ -1,9 +1,15 @@
 package io.ionic.portals
 
 import android.content.Context
+import android.util.Log
 import com.getcapacitor.Plugin
+import io.ionic.liveupdateprovider.LiveUpdateProviderError
+import io.ionic.liveupdateprovider.LiveUpdateProviderManager
+import io.ionic.liveupdateprovider.LiveUpdateProviderSyncCallback
+import io.ionic.liveupdateprovider.LiveUpdateProviderSyncResult
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
+import java.io.File
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -25,6 +31,21 @@ import io.ionic.liveupdates.LiveUpdateManager
  * @property name the name of the Portal
  */
 class Portal(val name: String) {
+    /**
+     * The live update source for a [Portal].
+     */
+    sealed class LiveUpdateSource {
+        /**
+         * Uses Ionic Live Updates to sync and locate the latest web application assets.
+         */
+        data class Ionic(val liveUpdateConfig: LiveUpdate) : LiveUpdateSource()
+
+        /**
+         * Uses a [LiveUpdateProviderManager] to sync and locate the latest web application assets.
+         */
+        data class Provider(val manager: LiveUpdateProviderManager) : LiveUpdateSource()
+    }
+
     /**
      * Capacitor [Plugin] registered with the Portal.
      */
@@ -73,22 +94,30 @@ class Portal(val name: String) {
     var devMode: Boolean = true
 
     /**
-     * A LiveUpdate config, if live updates is being used.
+     * The live update source for this Portal.
+     *
+     * Use [LiveUpdateSource.Ionic] for Ionic Live Updates, or [LiveUpdateSource.Provider] for
+     * an external provider built with the Live Update Provider SDK.
      */
-    var liveUpdateConfig: LiveUpdate? = null
+    var liveUpdateSource: LiveUpdateSource? = null
         set(value) {
             field = value
-            if (value != null) {
-                if(value.assetPath == null) {
-                    value.assetPath = this.startDir
-                }
+            if (value is LiveUpdateSource.Ionic && value.liveUpdateConfig.assetPath == null) {
+                value.liveUpdateConfig.assetPath = this.startDir
             }
         }
 
     /**
-     * Whether to run a live update sync when the portal is added to the manager.
+     * The directory of the latest synced web application assets for this Portal.
+     * Returns null when no live update source is configured or no sync has completed.
      */
-    var liveUpdateOnAppLoad: Boolean = true
+    fun latestAppDirectory(context: Context): File? {
+        return when (val source = liveUpdateSource) {
+            is LiveUpdateSource.Ionic -> LiveUpdateManager.getLatestAppDirectory(context, source.liveUpdateConfig.appId)
+            is LiveUpdateSource.Provider -> source.manager.latestAppDirectory
+            null -> null
+        }
+    }
 
     /**
      * Add a Capacitor [Plugin] to be loaded with this Portal.
@@ -308,7 +337,7 @@ class PortalBuilder(val name: String) {
     private var initialContext: Any? = null
     private var portalFragmentType: Class<out PortalFragment?> = PortalFragment::class.java
     private var onCreate: (portal: Portal) -> Unit = {}
-    private var liveUpdateConfig: LiveUpdate? = null
+    private var liveUpdateSource: Portal.LiveUpdateSource? = null
     private var devMode: Boolean = true
 
     internal constructor(name: String, onCreate: (portal: Portal) -> Unit) : this(name) {
@@ -526,31 +555,32 @@ class PortalBuilder(val name: String) {
     }
 
     /**
-     * Set the [LiveUpdate] config if using the Live Updates SDK with Portals.
+     * Set the [LiveUpdate] config if using Ionic Live Updates with Portals.
      *
      * Example usage (kotlin):
      * ```kotlin
      * val liveUpdateConfig = LiveUpdate("appId", "production")
-     * builder = builder.setLiveUpdateConfig(liveUpdateConfig)
+     * builder = builder.setLiveUpdateConfig(context, liveUpdateConfig)
      * ```
      *
      * Example usage (java):
      * ```java
      * LiveUpdate liveUpdateConfig = new LiveUpdate("appId", "production");
-     * builder = builder.setLiveUpdateConfig(liveUpdateConfig);
+     * builder = builder.setLiveUpdateConfig(context, liveUpdateConfig);
      * ```
      *
-     * @param context the Android [Context] used with Live Update configuration
-     * @param liveUpdateConfig the Live Update config object
-     * @param updateOnAppLoad if a Live Update sync should occur as soon as the Portal loads
-     * @return the instance of the PortalBuilder with the Live Update config set
+     * @param context the Android [Context] used with Ionic Live Updates configuration.
+     * @param liveUpdateConfig the Ionic Live Updates config object.
+     * @param updateOnAppLoad whether to start an Ionic Live Updates sync when the Portal is configured.
+     * @return the instance of the PortalBuilder with the Ionic Live Updates config set.
      */
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
-        this.liveUpdateConfig = liveUpdateConfig
+        requireNoLiveUpdateSource()
         if(liveUpdateConfig.assetPath == null) {
             liveUpdateConfig.assetPath = this._startDir ?: this.name
         }
+        this.liveUpdateSource = Portal.LiveUpdateSource.Ionic(liveUpdateConfig)
 
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
@@ -559,6 +589,57 @@ class PortalBuilder(val name: String) {
             LiveUpdateManager.sync(context, arrayOf(liveUpdateConfig.appId))
         }
         return this
+    }
+
+    /**
+     * Set a live update provider manager to be used with the Portal.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * builder = builder.setLiveUpdateProviderManager(providerManager)
+     * ```
+     *
+     * Example usage (java):
+     * ```java
+     * builder = builder.setLiveUpdateProviderManager(providerManager);
+     * ```
+     *
+     * To trigger a provider sync after the Portal is created, use the provider manager directly.
+     *
+     * @param liveUpdateProviderManager the external live update provider manager.
+     * @param updateOnAppLoad whether to start an external provider sync when the Portal is configured.
+     * @return the instance of the PortalBuilder with the external live update provider manager set.
+     */
+    @JvmOverloads
+    fun setLiveUpdateProviderManager(
+        liveUpdateProviderManager: LiveUpdateProviderManager,
+        updateOnAppLoad: Boolean = true
+    ): PortalBuilder {
+        requireNoLiveUpdateSource()
+        this.liveUpdateSource = Portal.LiveUpdateSource.Provider(liveUpdateProviderManager)
+        if (updateOnAppLoad) {
+            liveUpdateProviderManager.sync(
+                callback = object : LiveUpdateProviderSyncCallback {
+                    override fun onSuccess(result: LiveUpdateProviderSyncResult) {
+                        Log.d(
+                            "PortalBuilder",
+                            "Live Update sync complete. Latest app dir: ${liveUpdateProviderManager.latestAppDirectory}"
+                        )
+                    }
+
+                    override fun onFailure(error: LiveUpdateProviderError.SyncFailed) {
+                        Log.e("PortalBuilder", "Live Update sync failed: ${error.message}")
+                    }
+                }
+            )
+        }
+        return this
+    }
+
+    private fun requireNoLiveUpdateSource() {
+        check(liveUpdateSource == null) {
+            "A live update source is already configured for this Portal."
+        }
     }
 
     /**
@@ -597,7 +678,7 @@ class PortalBuilder(val name: String) {
         portal.addAssetMaps(assetMaps)
         portal.initialContext = this.initialContext
         portal.portalFragmentType = this.portalFragmentType
-        portal.liveUpdateConfig = this.liveUpdateConfig
+        portal.liveUpdateSource = this.liveUpdateSource
         portal.devMode = this.devMode
         onCreate(portal)
         return portal

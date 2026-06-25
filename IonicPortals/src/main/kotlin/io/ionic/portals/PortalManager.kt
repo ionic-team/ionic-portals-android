@@ -53,7 +53,7 @@ object PortalManager {
      * ```
      *
      * @param name the portal name
-     * @throws NoSuchElementException throws this exception if the Portal does not exist
+     * @throws IllegalStateException throws this exception if the Portal does not exist
      */
     @JvmStatic
     fun getPortal(name: String): Portal {
@@ -62,8 +62,8 @@ object PortalManager {
 
     /**
      * Removes the Portal from the Portal Manager. The Portal will be returned if it was present. If not, null is returned.
-     * Note: if the Portal uses Live Updates and registered an instance on creation, the Live Update instance for the app
-     * is not removed.
+     * Note: removing a Portal does not remove its Ionic Live Updates app instance from the
+     * Ionic Live Updates manager.
      *
      * @param name the name of the Portal to remove
      */
@@ -90,27 +90,6 @@ object PortalManager {
     @JvmStatic
     fun size(): Int {
         return portals.size
-    }
-
-    /**
-     * Portals registration is no longer required. This function is retained for source
-     * compatibility and has no effect.
-     *
-     * @param key A previously required Portals registration key.
-     */
-    @Deprecated("Portals registration is no longer required. This method has no effect.")
-    @JvmStatic
-    fun register(key: String) {}
-
-    /**
-     * Portals registration is no longer required.
-     *
-     * @return true.
-     */
-    @Deprecated("Portals registration is no longer required. This method always returns true.")
-    @JvmStatic
-    fun isRegistered(): Boolean {
-        return true
     }
 
     /**
