@@ -40,7 +40,7 @@ import java.util.ArrayList
  * </androidx.constraintlayout.widget.ConstraintLayout>
  * ```
  *
- * Jetpack Composd example usage:
+ * Jetpack Compose example usage:
  * ```kotlin
  * @Composable
  * fun loadPortal(portalId: String) {
