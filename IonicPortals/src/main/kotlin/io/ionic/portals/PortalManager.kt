@@ -69,7 +69,7 @@ object PortalManager {
      */
     @JvmStatic
     fun removePortal(name: String): Portal? {
-        return portals.remove(name)
+        return portals.remove(name)?.also { it.cancelPendingSyncs() }
     }
 
     /**

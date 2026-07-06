@@ -1,15 +1,22 @@
 package io.ionic.portals
 
 import android.content.Context
-import android.util.Log
 import com.getcapacitor.Plugin
-import io.ionic.liveupdateprovider.LiveUpdateProviderError
-import io.ionic.liveupdateprovider.LiveUpdateProviderManager
-import io.ionic.liveupdateprovider.LiveUpdateProviderSyncCallback
-import io.ionic.liveupdateprovider.LiveUpdateProviderSyncResult
+import io.ionic.liveupdateprovider.ProviderManager
+import io.ionic.liveupdateprovider.ProviderSyncResult
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
 import java.io.File
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+
+private const val PROVIDER_SYNC_TIMEOUT_MS = 5 * 60 * 1_000L
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -41,9 +48,9 @@ class Portal(val name: String) {
         data class Ionic(val liveUpdateConfig: LiveUpdate) : LiveUpdateSource()
 
         /**
-         * Uses a [LiveUpdateProviderManager] to sync and locate the latest web application assets.
+         * Uses an external live update provider to sync and locate the latest web application assets.
          */
-        data class Provider(val manager: LiveUpdateProviderManager) : LiveUpdateSource()
+        data class Provider(val manager: ProviderManager) : LiveUpdateSource()
     }
 
     /**
@@ -60,6 +67,21 @@ class Portal(val name: String) {
      * Asset Maps registered with the Portal.
      */
     internal var assetMaps = LinkedHashMap<String, AssetMap>()
+
+    /**
+     * A background scope used to run provider syncs started from [syncProviderAsync], since that
+     * method cannot suspend the caller. Canceled via [cancelPendingSyncs] when this Portal is
+     * discarded from [PortalManager].
+     */
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * Cancels any in-flight [syncProviderAsync] work for this Portal. Called by [PortalManager]
+     * when this Portal is removed.
+     */
+    internal fun cancelPendingSyncs() {
+        coroutineScope.cancel()
+    }
 
     /**
      * Initialize the Portal and add the PortalsPlugin by default.
@@ -86,7 +108,7 @@ class Portal(val name: String) {
      * if this value is not set.
      */
     var startDir: String = ""
-        get() = if (field.isEmpty()) name else field
+        get() = field.ifEmpty { name }
 
     /**
      * If the Portal should be loaded in development mode and look for a server URL.
@@ -118,6 +140,120 @@ class Portal(val name: String) {
             null -> null
         }
     }
+
+    /**
+     * Syncs the external live update provider source if present.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * val result = portal.syncProvider()
+     * ```
+     *
+     * Example usage (java):
+     * ```java
+     * // syncProvider() is a Kotlin suspend function and can't be called directly from Java.
+     * // Use syncProviderAsync instead:
+     * portal.syncProviderAsync(new Portal.ProviderSyncCallback() {
+     *     @Override
+     *     public void onSuccess(ProviderSyncResult result) {
+     *         // handle result
+     *     }
+     *
+     *     @Override
+     *     public void onFailure(Exception error) {
+     *         // handle error
+     *     }
+     * });
+     * ```
+     *
+     * @return the result of the synchronization operation, or null when no update is available.
+     * @throws LiveUpdateNotConfigured if this Portal has no [LiveUpdateSource.Provider] configured.
+     */
+    suspend fun syncProvider(): ProviderSyncResult? {
+        val source = liveUpdateSource as? LiveUpdateSource.Provider ?: throw LiveUpdateNotConfigured()
+        return source.manager.sync()
+    }
+
+    /**
+     * Syncs the external live update provider source if present, reporting the outcome to
+     * [callback] instead of suspending. This is the Java-friendly counterpart to [syncProvider].
+     *
+     * The sync runs on a background coroutine scope owned by this Portal and is bounded by a
+     * [PROVIDER_SYNC_TIMEOUT_MS] timeout; [callback] is invoked with the result, or with the
+     * error (including [LiveUpdateNotConfigured] or a timeout) if the sync fails.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * portal.syncProviderAsync(object : Portal.ProviderSyncCallback {
+     *     override fun onSuccess(result: ProviderSyncResult?) {
+     *         // handle result
+     *     }
+     *
+     *     override fun onFailure(error: Exception) {
+     *         // handle error
+     *     }
+     * })
+     * ```
+     *
+     * Example usage (java):
+     * ```java
+     * portal.syncProviderAsync(new Portal.ProviderSyncCallback() {
+     *     @Override
+     *     public void onSuccess(ProviderSyncResult result) {
+     *         // handle result
+     *     }
+     *
+     *     @Override
+     *     public void onFailure(Exception error) {
+     *         // handle error
+     *     }
+     * });
+     * ```
+     *
+     * @param callback invoked with the result of the synchronization operation, or with the
+     * error if the sync fails.
+     */
+    fun syncProviderAsync(callback: ProviderSyncCallback) {
+        coroutineScope.launch {
+            val result = try {
+                withTimeout(PROVIDER_SYNC_TIMEOUT_MS) { syncProvider() }
+            } catch (timeout: TimeoutCancellationException) {
+                callback.onFailure(timeout)
+                return@launch
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
+                callback.onFailure(error)
+                return@launch
+            }
+            callback.onSuccess(result)
+        }
+    }
+
+    /**
+     * Callback used to report the outcome of a [syncProviderAsync] call to Java callers.
+     */
+    interface ProviderSyncCallback {
+        /**
+         * Called when the sync completes successfully.
+         *
+         * @param result the result of the synchronization operation, or null when no update is available.
+         */
+        fun onSuccess(result: ProviderSyncResult?)
+
+        /**
+         * Called when the sync fails.
+         *
+         * @param error the error that caused the sync to fail.
+         */
+        fun onFailure(error: Exception)
+    }
+
+    /**
+     * Thrown when a live update sync is requested but the required live update source is not
+     * present on the [Portal].
+     */
+    class LiveUpdateNotConfigured : Exception("The requested live update source is not configured for this Portal.")
 
     /**
      * Add a Capacitor [Plugin] to be loaded with this Portal.
@@ -427,7 +563,7 @@ class PortalBuilder(val name: String) {
      * @return the instance of the PortalBuilder with the Asset Map added
      */
     fun addAssetMap(assetMap: AssetMap): PortalBuilder {
-        assetMaps.put(assetMap.getAssetPath(), assetMap)
+        assetMaps[assetMap.getAssetPath()] = assetMap
         return this
     }
 
@@ -604,35 +740,12 @@ class PortalBuilder(val name: String) {
      * builder = builder.setLiveUpdateProviderManager(providerManager);
      * ```
      *
-     * To trigger a provider sync after the Portal is created, use the provider manager directly.
-     *
      * @param liveUpdateProviderManager the external live update provider manager.
-     * @param updateOnAppLoad whether to start an external provider sync when the Portal is configured.
      * @return the instance of the PortalBuilder with the external live update provider manager set.
      */
-    @JvmOverloads
-    fun setLiveUpdateProviderManager(
-        liveUpdateProviderManager: LiveUpdateProviderManager,
-        updateOnAppLoad: Boolean = true
-    ): PortalBuilder {
+    fun setLiveUpdateProviderManager(liveUpdateProviderManager: ProviderManager): PortalBuilder {
         requireNoLiveUpdateSource()
         this.liveUpdateSource = Portal.LiveUpdateSource.Provider(liveUpdateProviderManager)
-        if (updateOnAppLoad) {
-            liveUpdateProviderManager.sync(
-                callback = object : LiveUpdateProviderSyncCallback {
-                    override fun onSuccess(result: LiveUpdateProviderSyncResult) {
-                        Log.d(
-                            "PortalBuilder",
-                            "Live Update sync complete. Latest app dir: ${liveUpdateProviderManager.latestAppDirectory}"
-                        )
-                    }
-
-                    override fun onFailure(error: LiveUpdateProviderError.SyncFailed) {
-                        Log.e("PortalBuilder", "Live Update sync failed: ${error.message}")
-                    }
-                }
-            )
-        }
         return this
     }
 
