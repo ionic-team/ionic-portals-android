@@ -11,12 +11,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
-
-private const val PROVIDER_SYNC_TIMEOUT_MS = 5 * 60 * 1_000L
+import kotlinx.coroutines.withContext
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -70,18 +66,9 @@ class Portal(val name: String) {
 
     /**
      * A background scope used to run provider syncs started from [syncProviderAsync], since that
-     * method cannot suspend the caller. Canceled via [cancelPendingSyncs] when this Portal is
-     * discarded from [PortalManager].
+     * method cannot suspend the caller.
      */
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    /**
-     * Cancels any in-flight [syncProviderAsync] work for this Portal. Called by [PortalManager]
-     * when this Portal is removed.
-     */
-    internal fun cancelPendingSyncs() {
-        coroutineScope.cancel()
-    }
 
     /**
      * Initialize the Portal and add the PortalsPlugin by default.
@@ -166,6 +153,9 @@ class Portal(val name: String) {
      * });
      * ```
      *
+     * This does not apply a timeout; the provider implementation is responsible for bounding its
+     * own sync operation, if desired.
+     *
      * @return the result of the synchronization operation, or null when no update is available.
      * @throws LiveUpdateNotConfigured if this Portal has no [LiveUpdateSource.Provider] configured.
      */
@@ -178,9 +168,9 @@ class Portal(val name: String) {
      * Syncs the external live update provider source if present, reporting the outcome to
      * [callback] instead of suspending. This is the Java-friendly counterpart to [syncProvider].
      *
-     * The sync runs on a background coroutine scope owned by this Portal and is bounded by a
-     * [PROVIDER_SYNC_TIMEOUT_MS] timeout; [callback] is invoked with the result, or with the
-     * error (including [LiveUpdateNotConfigured] or a timeout) if the sync fails.
+     * The sync runs on a background coroutine scope owned by this Portal. [callback] is invoked
+     * on the main thread with the result, or with the error (including [LiveUpdateNotConfigured])
+     * if the sync fails. This does not apply a timeout; see [syncProvider].
      *
      * Example usage (kotlin):
      * ```kotlin
@@ -215,18 +205,19 @@ class Portal(val name: String) {
      */
     fun syncProviderAsync(callback: ProviderSyncCallback) {
         coroutineScope.launch {
+            var error: Exception? = null
             val result = try {
-                withTimeout(PROVIDER_SYNC_TIMEOUT_MS) { syncProvider() }
-            } catch (timeout: TimeoutCancellationException) {
-                callback.onFailure(timeout)
-                return@launch
+                syncProvider()
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (error: Exception) {
-                callback.onFailure(error)
-                return@launch
+            } catch (e: Exception) {
+                error = e
+                null
             }
-            callback.onSuccess(result)
+            val failure = error
+            withContext(Dispatchers.Main) {
+                if (failure != null) callback.onFailure(failure) else callback.onSuccess(result)
+            }
         }
     }
 
