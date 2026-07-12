@@ -598,8 +598,7 @@ class PortalBuilder(val name: String) {
      * builder = builder.setLiveUpdateProviderManager(providerManager);
      * ```
      *
-     * @param liveUpdateProviderManager the external live update provider manager. Whether and when it syncs
-     * (e.g. on construction) is up to the provider implementation itself.
+     * @param liveUpdateProviderManager the external live update provider manager.
      * @return the instance of the PortalBuilder with the external live update provider manager set.
      */
     fun setLiveUpdateProviderManager(liveUpdateProviderManager: ProviderManager): PortalBuilder {

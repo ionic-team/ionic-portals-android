@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.getcapacitor.*
@@ -160,7 +159,7 @@ open class PortalFragment : Fragment {
     /**
      * Extends the Android Fragment 'onConfigurationChanged' event.
      */
-    override fun onConfigurationChanged(@NonNull newConfig: Configuration) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         bridge?.onConfigurationChanged(newConfig)
     }
@@ -405,7 +404,7 @@ open class PortalFragment : Fragment {
                 is String -> {
                     try {
                         JSONObject(initialContext)
-                    } catch (ex: JSONException) {
+                    } catch (_: JSONException) {
                         throw Error("initialContext must be a JSON string or a Map")
                     }
                 }
@@ -473,7 +472,7 @@ open class PortalFragment : Fragment {
 
             when (member.parameters.size) {
                 1 -> {
-                    val ref = pubSub.subscribe(methodName) { result ->
+                    val ref = pubSub.subscribe(methodName) { _ ->
                         member.call(messageReceiverParent)
                     }
                     subscriptions[methodName] = ref
