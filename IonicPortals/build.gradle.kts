@@ -49,9 +49,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
     api("com.capacitorjs:core:[8.0.0,9.0.0)")
-    // Substituted with the local ../live-update-provider-sdk checkout (feat/api-0.2.0)
-    // via includeBuild in settings.gradle when that checkout is present.
-    api("io.ionic:liveupdateprovider:0.2.0")
+    api("io.ionic:liveupdateprovider:1.0.0")
     compileOnly("io.ionic:liveupdates:0.5.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

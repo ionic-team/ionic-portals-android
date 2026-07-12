@@ -17,15 +17,3 @@ rootProject.name = "IonicPortals"
 include ':IonicPortals'
 include ':TestApp'
 include ':TestAppCompose'
-
-// Local dev: build io.ionic:liveupdateprovider from source against the sibling
-// live-update-provider-sdk checkout instead of Maven Central, so we can work
-// against its unreleased API. Remove once a matching release is published.
-def liveUpdateProviderSdkDir = new File(rootDir, '../live-update-provider-sdk/android')
-if (liveUpdateProviderSdkDir.exists()) {
-    includeBuild(liveUpdateProviderSdkDir) {
-        dependencySubstitution {
-            substitute module('io.ionic:liveupdateprovider') using project(':live-update-provider')
-        }
-    }
-}
