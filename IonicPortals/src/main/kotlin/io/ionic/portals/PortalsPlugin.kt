@@ -1,6 +1,5 @@
 package io.ionic.portals
 
-import android.util.Log
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONException
@@ -65,7 +64,7 @@ class PortalsPubSub {
 }
 
 /**
- * A special Capacitor Plugin within the Portals library that allows for bi-directional communication
+ * A special Capacitor Plugin within the Portals library that allows for bidirectional communication
  * between Android and web code. It is loaded with every Portal automatically and does not need to be
  * added like other plugins if the default behavior is desired.
  *
@@ -91,7 +90,7 @@ class PortalsPlugin(private val pubSub: PortalsPubSub = PortalsPubSub.shared) : 
 
         val data = try {
             call.data.get("data")
-        } catch (e: JSONException) {
+        } catch (_: JSONException) {
             null
         }
 
@@ -130,7 +129,7 @@ class PortalsPlugin(private val pubSub: PortalsPubSub = PortalsPubSub.shared) : 
  * @return a map representation of the JSONObject
  */
 fun JSONObject.toMap(): Map<String, Any> {
-    val map = mutableMapOf<String, Any>();
+    val map = mutableMapOf<String, Any>()
     this.keys().forEach {
         map[it] = this.get(it)
     }

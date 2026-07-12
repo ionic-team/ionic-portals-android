@@ -22,7 +22,7 @@ object DevConfiguration {
             assetManager.open("$portalDirName/$urlFileName").bufferedReader().use {
                 it.readText()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 
@@ -31,7 +31,7 @@ object DevConfiguration {
                 assetManager.open("$generalDirName/$urlFileName").bufferedReader().use {
                     it.readText()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
@@ -50,7 +50,7 @@ object DevConfiguration {
         var serverConfig = try {
             val configFile = context.assets.open("$portalDirName/$capConfigFileName")
             CapConfig.loadFromAssets(context, portalDirName)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 
@@ -58,7 +58,7 @@ object DevConfiguration {
             serverConfig = try {
                 val configFile = context.assets.open("$generalDirName/$capConfigFileName")
                 CapConfig.loadFromAssets(context, generalDirName)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
