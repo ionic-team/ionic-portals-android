@@ -1,15 +1,11 @@
 package io.ionic.portals
 
 import android.content.Context
-import com.getcapacitor.Logger
 import com.getcapacitor.Plugin
 import io.ionic.liveupdateprovider.ProviderManager
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
 import java.io.File
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
