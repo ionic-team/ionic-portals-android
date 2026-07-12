@@ -565,7 +565,7 @@ class PortalBuilder(val name: String) {
      * @param context the Android [Context] used with live update configuration.
      * @param liveUpdateConfig the live update config object.
      * @param updateOnAppLoad if a sync should occur as soon as the Portal loads
-     * @return the instance of the PortalBuilder with the Ionic Live Updates config set.
+     * @return the instance of the PortalBuilder with the live update config set.
      */
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
