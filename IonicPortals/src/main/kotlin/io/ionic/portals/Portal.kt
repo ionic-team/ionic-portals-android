@@ -103,7 +103,6 @@ class Portal(val name: String) {
 
     /**
      * The directory of the latest synced web application assets for this Portal.
-     * Returns null when no live update source is configured or no sync has completed.
      */
     fun latestAppDirectory(context: Context): File? {
         return when (val source = liveUpdateSource) {
@@ -563,18 +562,17 @@ class PortalBuilder(val name: String) {
      * builder = builder.setLiveUpdateConfig(context, liveUpdateConfig);
      * ```
      *
-     * @param context the Android [Context] used with Ionic Live Updates configuration.
-     * @param liveUpdateConfig the Ionic Live Updates config object.
-     * @param updateOnAppLoad whether to start an Ionic Live Updates sync when the Portal is configured.
+     * @param context the Android [Context] used with live update configuration.
+     * @param liveUpdateConfig the live update config object.
+     * @param updateOnAppLoad if a sync should occur as soon as the Portal loads
      * @return the instance of the PortalBuilder with the Ionic Live Updates config set.
      */
     @JvmOverloads
     fun setLiveUpdateConfig(context: Context, liveUpdateConfig: LiveUpdate, updateOnAppLoad: Boolean = true): PortalBuilder {
-        check(liveUpdateSource == null) { "A live update source is already configured for this Portal." }
+        this.liveUpdateSource = Portal.LiveUpdateSource.Ionic(liveUpdateConfig)
         if(liveUpdateConfig.assetPath == null) {
             liveUpdateConfig.assetPath = this._startDir ?: this.name
         }
-        this.liveUpdateSource = Portal.LiveUpdateSource.Ionic(liveUpdateConfig)
 
         LiveUpdateManager.initialize(context)
         LiveUpdateManager.cleanVersions(context, liveUpdateConfig.appId)
@@ -602,7 +600,6 @@ class PortalBuilder(val name: String) {
      * @return the instance of the PortalBuilder with the external live update provider manager set.
      */
     fun setLiveUpdateProviderManager(liveUpdateProviderManager: ProviderManager): PortalBuilder {
-        check(liveUpdateSource == null) { "A live update source is already configured for this Portal." }
         this.liveUpdateSource = Portal.LiveUpdateSource.Provider(liveUpdateProviderManager)
         return this
     }
