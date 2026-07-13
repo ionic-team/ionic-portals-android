@@ -3,9 +3,14 @@ package io.ionic.portals
 import android.content.Context
 import com.getcapacitor.Plugin
 import io.ionic.liveupdateprovider.ProviderManager
+import io.ionic.liveupdateprovider.ProviderSyncResult
 import io.ionic.liveupdates.LiveUpdate
 import io.ionic.liveupdates.LiveUpdateManager
 import java.io.File
+import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.future
 
 /**
  * A class representing a Portal that contains information about the web content to load and any
@@ -111,6 +116,52 @@ class Portal(val name: String) {
             null -> null
         }
     }
+
+    /**
+     * Syncs the external live update provider source if present.
+     *
+     * Example usage (kotlin):
+     * ```kotlin
+     * val result = portal.syncProvider()
+     * ```
+     *
+     * This is a suspend function and can't be called directly from Java — use [syncProviderAsync] instead.
+     *
+     * @return the result of the synchronization operation.
+     * @throws LiveUpdateNotConfigured if this Portal has no [LiveUpdateSource.Provider] configured.
+     */
+    suspend fun syncProvider(): ProviderSyncResult? {
+        val source = liveUpdateSource as? LiveUpdateSource.Provider ?: throw LiveUpdateNotConfigured()
+        return source.manager.sync()
+    }
+
+    /**
+     * Syncs the external live update provider source if present, returning a [CompletableFuture]
+     * instead of suspending. This is the Java-friendly counterpart to [syncProvider].
+     *
+     * Example usage (java):
+     * ```java
+     * portal.syncProviderAsync().thenAccept(result -> {
+     *     // handle result
+     * }).exceptionally(error -> {
+     *     // handle error (including LiveUpdateNotConfigured)
+     *     return null;
+     * });
+     * ```
+     *
+     * Kotlin callers should prefer [syncProvider] directly; use this only if you specifically need a
+     * [CompletableFuture], e.g. for interop with existing Future-based code.
+     *
+     * @return a [CompletableFuture] completed with the result of the synchronization operation,
+     * or completed exceptionally if the sync fails.
+     */
+    fun syncProviderAsync(): CompletableFuture<ProviderSyncResult?> = CoroutineScope(Dispatchers.IO).future { syncProvider() }
+
+    /**
+     * Thrown when a live update sync is requested but the required live update source is not
+     * present on the [Portal].
+     */
+    class LiveUpdateNotConfigured : Exception("The requested live update source is not configured for this Portal.")
 
     /**
      * Add a Capacitor [Plugin] to be loaded with this Portal.
@@ -596,7 +647,9 @@ class PortalBuilder(val name: String) {
      * builder = builder.setLiveUpdateProviderManager(providerManager);
      * ```
      *
-     * @param liveUpdateProviderManager the external live update provider manager.
+     * @param liveUpdateProviderManager the external live update provider manager. Whether and when it syncs
+     * on its own (e.g. on construction) is up to the provider implementation; use [Portal.syncProvider]/
+     * [Portal.syncProviderAsync] to trigger a sync manually.
      * @return the instance of the PortalBuilder with the external live update provider manager set.
      */
     fun setLiveUpdateProviderManager(liveUpdateProviderManager: ProviderManager): PortalBuilder {
