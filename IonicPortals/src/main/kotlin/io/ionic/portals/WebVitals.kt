@@ -4,7 +4,6 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
-import org.json.JSONObject
 
 /**
  * A class providing Web Vitals functionality. When Web Vitals metrics are desired, this class adds

@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Canvas
 import android.os.Build
-import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
 import android.view.WindowInsets
@@ -40,7 +39,7 @@ import java.util.ArrayList
  * </androidx.constraintlayout.widget.ConstraintLayout>
  * ```
  *
- * Jetpack Composd example usage:
+ * Jetpack Compose example usage:
  * ```kotlin
  * @Composable
  * fun loadPortal(portalId: String) {
@@ -88,7 +87,7 @@ class PortalView : FrameLayout {
         this.onBridgeAvailable = onBridgeAvailable
         this.portalId = portalId
         this.viewId = viewId
-        this.id = View.generateViewId()
+        this.id = generateViewId()
         loadPortal(context, null)
     }
 
@@ -100,7 +99,7 @@ class PortalView : FrameLayout {
         this.portal = portal
         this.portalId = portal.name
         this.viewId = viewId
-        this.id = View.generateViewId()
+        this.id = generateViewId()
         loadPortal(context, null)
     }
 
@@ -264,7 +263,7 @@ class PortalView : FrameLayout {
 
     override fun drawChild(canvas: Canvas, child: View, drawingTime: Long): Boolean {
         if (mDrawDisappearingViewsFirst && (mDisappearingFragmentChildren != null
-                    ) && (mDisappearingFragmentChildren!!.size > 0)
+                    ) && (mDisappearingFragmentChildren!!.isNotEmpty())
         ) {
             // If the child is disappearing, we have already drawn it so skip.
             if (mDisappearingFragmentChildren!!.contains(child)) {

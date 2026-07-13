@@ -8,11 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.getcapacitor.*
-import io.ionic.liveupdates.LiveUpdateManager
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
@@ -161,7 +159,7 @@ open class PortalFragment : Fragment {
     /**
      * Extends the Android Fragment 'onConfigurationChanged' event.
      */
-    override fun onConfigurationChanged(@NonNull newConfig: Configuration) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         bridge?.onConfigurationChanged(newConfig)
     }
@@ -265,11 +263,11 @@ open class PortalFragment : Fragment {
 
     /**
      * Reloads the Portal.
-     * If Live Updates is used and the web content was updated, the new content will be loaded.
+     * If a live update source is configured and the web content was updated, the new content will be loaded.
      */
     fun reload() {
-        if(portal?.liveUpdateConfig != null) {
-            val latestLiveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
+        if(portal?.liveUpdateSource != null) {
+            val latestLiveUpdateFiles = portal?.latestAppDirectory(requireContext())
             if (latestLiveUpdateFiles != null) {
                 if (liveUpdateFiles == null || liveUpdateFiles!!.path != latestLiveUpdateFiles.path) {
                     liveUpdateFiles = latestLiveUpdateFiles
@@ -299,7 +297,7 @@ open class PortalFragment : Fragment {
             if (existingPortalName != null && portal == null) {
                 try {
                     portal = PortalManager.getPortal(existingPortalName)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     Logger.warn("Attempted to reload PortalFragment from App restore but portal not found.")
                     Logger.warn("No portal named $existingPortalName found in PortalManager to use.")
                     Logger.warn("Portal reload is unsuccessful. This is likely okay and safe to ignore if your app is returning from a force quit state.")
@@ -323,27 +321,17 @@ open class PortalFragment : Fragment {
                     .addPluginInstances(initialPluginInstances)
                     .addWebViewListeners(webViewListeners)
 
-                if (portal?.liveUpdateConfig != null) {
-                    liveUpdateFiles = LiveUpdateManager.getLatestAppDirectory(requireContext(), portal?.liveUpdateConfig?.appId!!)
-                    bridgeBuilder = if (liveUpdateFiles != null) {
-                        if (config == null) {
-                            val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
-                            if(configFile.exists()) {
-                                configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
-                            }
-                        }
+                liveUpdateFiles = portal?.latestAppDirectory(requireContext())
 
-                        bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
-                    } else {
-                        if (config == null) {
-                            try {
-                                val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
-                                configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
-                            } catch (_: Exception) {}
+                bridgeBuilder = if (liveUpdateFiles != null) {
+                    if (config == null) {
+                        val configFile = File(liveUpdateFiles!!.path + "/capacitor.config.json")
+                        if(configFile.exists()) {
+                            configToUse = CapConfig.loadFromFile(requireContext(), liveUpdateFiles!!.path)
                         }
-
-                        bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                     }
+
+                    bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.BASE_PATH, liveUpdateFiles!!.path))
                 } else {
                     if (config == null) {
                         try {
@@ -352,7 +340,7 @@ open class PortalFragment : Fragment {
                         } catch (_: Exception) {}
                     }
 
-                    bridgeBuilder = bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
+                    bridgeBuilder.setServerPath(ServerPath(ServerPath.PathType.ASSET_PATH, startDir))
                 }
 
                 portal?.assetMaps?.let {
@@ -416,7 +404,7 @@ open class PortalFragment : Fragment {
                 is String -> {
                     try {
                         JSONObject(initialContext)
-                    } catch (ex: JSONException) {
+                    } catch (_: JSONException) {
                         throw Error("initialContext must be a JSON string or a Map")
                     }
                 }
@@ -484,7 +472,7 @@ open class PortalFragment : Fragment {
 
             when (member.parameters.size) {
                 1 -> {
-                    val ref = pubSub.subscribe(methodName) { result ->
+                    val ref = pubSub.subscribe(methodName) { _ ->
                         member.call(messageReceiverParent)
                     }
                     subscriptions[methodName] = ref
