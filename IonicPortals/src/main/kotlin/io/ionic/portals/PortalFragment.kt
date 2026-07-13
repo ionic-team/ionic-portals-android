@@ -321,7 +321,7 @@ open class PortalFragment : Fragment {
                     .addPluginInstances(initialPluginInstances)
                     .addWebViewListeners(webViewListeners)
 
-                liveUpdateFiles = if (portal?.liveUpdateSource != null) portal?.latestAppDirectory(requireContext()) else null
+                liveUpdateFiles = portal?.latestAppDirectory(requireContext())
 
                 bridgeBuilder = if (liveUpdateFiles != null) {
                     if (config == null) {

@@ -33,21 +33,6 @@ import kotlinx.coroutines.future.future
  */
 class Portal(val name: String) {
     /**
-     * The live update source for a [Portal].
-     */
-    sealed class LiveUpdateSource {
-        /**
-         * Uses Ionic Live Updates to sync and locate the latest web application assets.
-         */
-        data class Ionic(val liveUpdateConfig: LiveUpdate) : LiveUpdateSource()
-
-        /**
-         * Uses an external live update provider to sync and locate the latest web application assets.
-         */
-        data class Provider(val manager: ProviderManager) : LiveUpdateSource()
-    }
-
-    /**
      * Capacitor [Plugin] registered with the Portal.
      */
     internal val plugins = ArrayList<Class<out Plugin?>>()
@@ -93,6 +78,21 @@ class Portal(val name: String) {
      * If the Portal should be loaded in development mode and look for a server URL.
      */
     var devMode: Boolean = true
+
+    /**
+     * The live update source for a [Portal].
+     */
+    sealed class LiveUpdateSource {
+        /**
+         * Uses Ionic Live Updates to sync and locate the latest web application assets.
+         */
+        data class Ionic(val liveUpdateConfig: LiveUpdate) : LiveUpdateSource()
+
+        /**
+         * Uses an external live update provider to sync and locate the latest web application assets.
+         */
+        data class Provider(val manager: ProviderManager) : LiveUpdateSource()
+    }
 
     /**
      * The live update source for this Portal — [LiveUpdateSource.Ionic] for Ionic Live Updates, or
