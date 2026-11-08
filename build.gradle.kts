@@ -1,5 +1,5 @@
 plugins {
-    id("org.jetbrains.dokka") version "2.0.0"
+    id("org.jetbrains.dokka") version "2.3.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
@@ -22,7 +22,7 @@ buildscript {
             classpath("io.github.gradle-nexus:publish-plugin:1.1.0")
         }
 
-        classpath("com.android.tools.build:gradle:8.13.0")
+        classpath("com.android.tools.build:gradle:9.4.1")
         classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
@@ -37,7 +37,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Capacitor 9 beta is not on Maven Central yet; publish it to mavenLocal from @capacitor/android
+        mavenLocal()
     }
-
-    apply(plugin = "org.jetbrains.dokka")
 }
