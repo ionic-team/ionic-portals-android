@@ -1,6 +1,5 @@
 plugins {
     id("org.jetbrains.dokka") version "2.3.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
 buildscript {
@@ -23,7 +22,6 @@ buildscript {
         }
 
         classpath("com.android.tools.build:gradle:9.4.1")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }

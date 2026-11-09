@@ -47,7 +47,7 @@ dependencies {
     api("io.ionic:liveupdateprovider:1.0.0")
     compileOnly("io.ionic:liveupdates:0.5.5")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("androidx.fragment:fragment-ktx:1.9.1")
     implementation("androidx.appcompat:appcompat:1.8.0")
     testImplementation("junit:junit:4.13.2")
