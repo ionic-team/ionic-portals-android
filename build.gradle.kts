@@ -4,9 +4,6 @@ plugins {
 
 buildscript {
     val kotlinVersion = "2.2.20"
-    extra.apply {
-        set("kotlinVersion", kotlinVersion)
-    }
 
     repositories {
         google()
