@@ -335,7 +335,7 @@ open class PortalFragment : Fragment {
                 } else {
                     if (config == null) {
                         try {
-                            val configFile = requireContext().assets.open("$startDir/capacitor.config.json")
+                            requireContext().assets.open("$startDir/capacitor.config.json").close()
                             configToUse = CapConfig.loadFromAssets(requireContext(), startDir)
                         } catch (_: Exception) {}
                     }
