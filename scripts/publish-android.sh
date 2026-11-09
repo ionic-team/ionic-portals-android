@@ -20,14 +20,14 @@ else
     export PORTALS_PUBLISH=true
 
     printf %"s\n" "Attempting to build and publish Portals version $PORTALS_VERSION"
-    $ANDROID_DIR/gradlew -p $ANDROID_DIR clean build publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository --max-workers 1 -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true > $LOG_OUTPUT 2>&1
+    $ANDROID_DIR/gradlew -p $ANDROID_DIR clean build publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository --max-workers 1 -Pandroid.useAndroidX=true > $LOG_OUTPUT 2>&1
 
     echo $RESULT
 
     if grep --quiet "BUILD SUCCESSFUL" $LOG_OUTPUT; then
         printf %"s\n" "Success: Ionic Portals published to MavenCentral."
     else
-        printf %"s\n" "Error publishing, check $LOG_OUTPUT for more info! Manually review and release from the Sonatype Repository Manager may be necessary https://s01.oss.sonatype.org/"
+        printf %"s\n" "Error publishing, check $LOG_OUTPUT for more info! Manually review and release from the Central Portal may be necessary https://central.sonatype.com/publishing/deployments"
         cat $LOG_OUTPUT
         exit 1
     fi

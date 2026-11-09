@@ -30,7 +30,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
     publishing {
-        singleVariant("release")
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 }
 

@@ -3,21 +3,6 @@ apply plugin: 'signing'
 
 def LIB_VERSION = System.getenv('PORTALS_VERSION')
 
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    if (project.plugins.findPlugin("com.android.library")) {
-        from android.sourceSets.main.java.srcDirs
-        from android.sourceSets.main.kotlin.srcDirs
-    } else {
-        from sourceSets.main.java.srcDirs
-        from sourceSets.main.kotlin.srcDirs
-    }
-}
-
-artifacts {
-    archives androidSourcesJar
-}
-
 group = 'io.ionic'
 version = LIB_VERSION
 
@@ -26,18 +11,12 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 // Coordinates
-                groupId 'io.ionic'
-                artifactId 'portals'
-                version LIB_VERSION
+                groupId = 'io.ionic'
+                artifactId = 'portals'
+                version = LIB_VERSION
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    artifact("$buildDir/libs/${project.getName()}-${version}.jar")
-                }
-
-                artifact androidSourcesJar
+                // The aar and the sources jar, from the release variant set up in build.gradle.kts
+                from components.release
 
                 // POM Data
                 pom {
