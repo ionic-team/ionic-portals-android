@@ -14,7 +14,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -47,7 +47,7 @@ kotlin {
 dependencies {
     implementation(kotlin("reflect"))
 
-    api("com.capacitorjs:core:[8.0.0,9.0.0)")
+    api("com.capacitorjs:core:[9.0.0,10.0.0)")
     api("io.ionic:liveupdateprovider:1.0.0")
     compileOnly("io.ionic:liveupdates:0.5.5")
 
